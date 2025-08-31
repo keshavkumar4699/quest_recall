@@ -1,0 +1,144 @@
+{
+  "subjects": {
+    "mathematics": {
+      "name": "Mathematics",
+      "topics": {
+        "algebra": {
+          "name": "Algebra",
+          "questions": [
+            "Solve for x: 2x + 5 = 13",
+            "What is the value of x in the equation 3x - 7 = 14?",
+            "Simplify: (x + 3)(x - 2)",
+            "If 2x + y = 10 and x - y = 2, find the value of x and y",
+            "Factor the expression: x\u00b2 - 9"
+          ]
+        },
+        "geometry": {
+          "name": "Geometry",
+          "questions": [
+            "What is the area of a circle with radius 5 units?",
+            "Find the perimeter of a rectangle with length 8 cm and width 6 cm",
+            "What is the sum of interior angles of a triangle?",
+            "Calculate the volume of a cube with side length 4 cm",
+            "What is the Pythagorean theorem?"
+          ]
+        },
+        "calculus": {
+          "name": "Calculus",
+          "questions": [
+            "Find the derivative of f(x) = x\u00b2",
+            "What is the integral of 2x dx?",
+            "Find the limit of (x\u00b2 - 1)/(x - 1) as x approaches 1",
+            "What is the chain rule in calculus?",
+            "Find the critical points of f(x) = x\u00b3 - 3x"
+          ]
+        }
+      }
+    },
+    "science": {
+      "name": "Science",
+      "topics": {
+        "physics": {
+          "name": "Physics",
+          "questions": [
+            "What is Newton's first law of motion?",
+            "Calculate the force needed to accelerate a 10 kg object at 2 m/s\u00b2",
+            "What is the speed of light in vacuum?",
+            "Explain the concept of gravitational force",
+            "What is the unit of electrical resistance?"
+          ]
+        },
+        "chemistry": {
+          "name": "Chemistry",
+          "questions": [
+            "What is the periodic table?",
+            "Balance the equation: H\u2082 + O\u2082 \u2192 H\u2082O",
+            "What is the difference between an atom and a molecule?",
+            "Explain the concept of pH",
+            "What are the three states of matter?"
+          ]
+        },
+        "biology": {
+          "name": "Biology",
+          "questions": [
+            "What is photosynthesis?",
+            "Name the parts of a plant cell",
+            "What is DNA and what does it stand for?",
+            "Explain the process of mitosis",
+            "What is the function of the heart in the circulatory system?"
+          ]
+        }
+      }
+    },
+    "history": {
+      "name": "History",
+      "topics": {
+        "ancient": {
+          "name": "Ancient History",
+          "questions": [
+            "Who was the first emperor of Rome?",
+            "What were the Seven Wonders of the Ancient World?",
+            "Describe the civilization of Ancient Egypt",
+            "What was the Silk Road?",
+            "Who was Alexander the Great?"
+          ]
+        },
+        "modern": {
+          "name": "Modern History",
+          "questions": [
+            "When did the Industrial Revolution begin?",
+            "What caused the French Revolution?",
+            "Who invented the printing press?",
+            "What was the Renaissance?",
+            "When did the American Civil War take place?"
+          ]
+        },
+        "wars": {
+          "name": "World Wars",
+          "questions": [
+            "What event triggered World War I?",
+            "When did World War II end?",
+            "Who were the Axis powers in World War II?",
+            "What was the Holocaust?",
+            "What was D-Day?"
+          ]
+        }
+      }
+    },
+    "english": {
+      "name": "English",
+      "topics": {
+        "grammar": {
+          "name": "Grammar",
+          "questions": [
+            "What is the difference between 'their', 'there', and 'they're'?",
+            "Identify the subject and predicate in: 'The cat sat on the mat'",
+            "What is a conjunction?",
+            "Convert to passive voice: 'John wrote the letter'",
+            "What is a conjunction?"
+          ]
+        },
+        "literature": {
+          "name": "Literature",
+          "questions": [
+            "Who wrote 'Romeo and Juliet'?",
+            "What is the theme of 'To Kill a Mockingbird'?",
+            "Who is the author of '1984'?",
+            "What is a metaphor?",
+            "Name three works by Charles Dickens"
+          ]
+        },
+        "writing": {
+          "name": "Writing",
+          "questions": [
+            "What are the components of a good essay?",
+            "How do you write a thesis statement?",
+            "What is the difference between formal and informal writing?",
+            "How do you structure a paragraph?",
+            "What are some common punctuation rules?"
+          ]
+        }
+      }
+    }
+  }
+}
