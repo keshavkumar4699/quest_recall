@@ -12,7 +12,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>📚 Study Buddy</h1>
+                    <h1>Study Buddy</h1>
                 </div>
 
                 <!-- Subject search in header (initially hidden) -->
@@ -20,7 +20,7 @@
                     <select class="form-control subject-search" id="headerSubjectSelect">
                         <option value="">Choose a different subject...</option>
                     </select>
-                    <button class="btn btn--secondary btn--sm" id="changeSubjectBtn">Change</button>
+                    <button class="btn btn--sm" id="changeSubjectBtn">Change</button>
                 </div>
 
                 <!-- Toggle Controls (initially hidden) -->
@@ -55,7 +55,7 @@
             <!-- Initial Subject Selection (center screen) -->
             <div class="subject-selection" id="subjectSelection">
                 <div class="welcome-section">
-                    <h1>Welcome to Study Buddy! 🌟</h1>
+                    <h1>Welcome to Study Buddy</h1>
                     <p>Choose your subject to start practicing questions</p>
                 </div>
 
@@ -67,7 +67,7 @@
             <!-- Topic Selection -->
             <div class="topic-selection hidden" id="topicSelection">
                 <div class="section-header">
-                    <button class="btn btn--secondary" id="backToSubjectsBtn">← Back to Subjects</button>
+                    <button class="btn" id="backToSubjectsBtn">← Back to Subjects</button>
                     <h2 id="selectedSubjectTitle">Select Topics</h2>
                 </div>
 
@@ -81,7 +81,7 @@
                         <button class="btn btn--outline" id="deselectAllTopicsBtn">Deselect All</button>
                     </div>
                     <button class="btn btn--primary btn--lg" id="startStudyingBtn" disabled>
-                        Start Studying 🚀
+                        Start Studying
                     </button>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                         <h2 id="questionsSubjectTitle">Mathematics Questions</h2>
                         <p id="questionStats">0 questions</p>
                     </div>
-                    <button class="btn btn--secondary" id="backToTopicsBtn">← Back to Topics</button>
+                    <button class="btn" id="backToTopicsBtn">← Back to Topics</button>
                 </div>
 
                 <div class="questions-list" id="questionsList">
@@ -104,9 +104,9 @@
             <!-- Review Questions -->
             <div class="review-container hidden" id="reviewContainer">
                 <div class="review-header">
-                    <h2>📌 Review Questions</h2>
+                    <h2>Review Questions</h2>
                     <p id="reviewStats">0 questions marked for review</p>
-                    <button class="btn btn--secondary" id="backFromReviewBtn">← Back</button>
+                    <button class="btn" id="backFromReviewBtn">← Back</button>
                 </div>
 
                 <div class="review-list" id="reviewList">
@@ -116,15 +116,8 @@
         </div>
     </main>
 
-    <!-- Loading indicator for JSON fetch -->
-    <div id="loadingIndicator" class="loading-overlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading question data...</p>
-        </div>
-    </div>
-
     <!-- Scripts -->
+    <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -8,111 +8,30 @@ let appState = {
     reviewQuestions: JSON.parse(localStorage.getItem('reviewQuestions') || '[]'),
     isRandomized: false,
     isReviewMode: false,
-    currentView: 'subjects', // subjects, topics, questions, review
-    questionBankData: null // Will store loaded JSON data
-};
-
-// Subject metadata (icons and colors)
-const subjectMetadata = {
-    mathematics: {
-        icon: "🧮",
-        color: "#FF6B6B"
-    },
-    science: {
-        icon: "🔬", 
-        color: "#4ECDC4"
-    },
-    history: {
-        icon: "📚",
-        color: "#FFD93D"
-    },
-    english: {
-        icon: "📖",
-        color: "#6C5CE7"
-    }
+    currentView: 'subjects' // subjects, topics, questions, review
 };
 
 // DOM elements
 let elements = {};
 
 // Initialize application
-async function init() {
+function init() {
     console.log('Initializing Study Buddy...');
 
-    try {
-        // Load JSON data
-        await loadQuestionBankData();
+    // Cache DOM elements
+    cacheElements();
 
-        // Hide loading overlay
-        hideLoadingOverlay();
+    // Load review questions from localStorage
+    loadReviewQuestions();
 
-        // Cache DOM elements
-        cacheElements();
+    // Populate subject cards
+    populateSubjectCards();
 
-        // Load review questions from localStorage
-        loadReviewQuestions();
+    // Bind event listeners
+    bindEvents();
 
-        // Populate subject cards
-        populateSubjectCards();
-
-        // Bind event listeners
-        bindEvents();
-
-        // Show initial view
-        showSubjectSelection();
-
-    } catch (error) {
-        console.error('Error initializing application:', error);
-        hideLoadingOverlay();
-        showError('Failed to load question data. Please refresh the page.');
-    }
-}
-
-// Hide loading overlay
-function hideLoadingOverlay() {
-    const loadingOverlay = document.getElementById('loadingIndicator');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-    }
-    document.body.classList.add('data-loaded');
-}
-
-// Load JSON data from data.json file
-async function loadQuestionBankData() {
-    try {
-        const response = await fetch('data.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        appState.questionBankData = await response.json();
-
-        // Add metadata to the loaded data
-        Object.keys(appState.questionBankData.subjects).forEach(subjectKey => {
-            if (subjectMetadata[subjectKey]) {
-                appState.questionBankData.subjects[subjectKey].icon = subjectMetadata[subjectKey].icon;
-                appState.questionBankData.subjects[subjectKey].color = subjectMetadata[subjectKey].color;
-            }
-        });
-
-        console.log('Question bank data loaded successfully');
-    } catch (error) {
-        console.error('Error loading question bank data:', error);
-        throw error;
-    }
-}
-
-// Show error message
-function showError(message) {
-    const container = document.querySelector('.container');
-    if (container) {
-        container.innerHTML = `
-            <div class="error-state">
-                <h2>⚠️ Error</h2>
-                <p>${message}</p>
-                <button class="btn btn--primary" onclick="location.reload()">Reload Page</button>
-            </div>
-        `;
-    }
+    // Show initial view
+    showSubjectSelection();
 }
 
 // Cache DOM elements
@@ -189,14 +108,12 @@ function showSubjectSelection() {
 }
 
 function showTopicSelection() {
-    if (!appState.selectedSubject || !appState.questionBankData) return;
+    if (!appState.selectedSubject) return;
 
     hideAllViews();
     elements.topicSelection?.classList.remove('hidden');
-
-    const subject = appState.questionBankData.subjects[appState.selectedSubject];
     elements.selectedSubjectTitle.textContent = 
-        `${subject.icon || '📚'} ${subject.name} Topics`;
+        `${questionBankData.subjects[appState.selectedSubject].icon} ${questionBankData.subjects[appState.selectedSubject].name} Topics`;
 
     populateTopicGrid();
     appState.currentView = 'topics';
@@ -241,17 +158,13 @@ function hideAllViews() {
 
 // Subject functions
 function populateSubjectCards() {
-    if (!appState.questionBankData) return;
-
-    const subjectsHTML = Object.keys(appState.questionBankData.subjects).map(subjectKey => {
-        const subject = appState.questionBankData.subjects[subjectKey];
+    const subjectsHTML = Object.keys(questionBankData.subjects).map(subjectKey => {
+        const subject = questionBankData.subjects[subjectKey];
         const topicCount = Object.keys(subject.topics).length;
-        const icon = subject.icon || '📚';
-        const color = subject.color || '#4ECDC4';
 
         return `
-            <div class="subject-card" data-subject="${subjectKey}" style="--subject-color: ${color}">
-                <div class="subject-icon">${icon}</div>
+            <div class="subject-card" data-subject="${subjectKey}">
+                <div class="subject-icon">${subject.icon}</div>
                 <h3 class="subject-name">${subject.name}</h3>
                 <p class="subject-info">${topicCount} topics available</p>
                 <button class="subject-select-btn">Select Subject</button>
@@ -278,9 +191,9 @@ function selectSubject(subjectKey) {
 
 // Topic functions
 function populateTopicGrid() {
-    if (!appState.selectedSubject || !appState.questionBankData) return;
+    if (!appState.selectedSubject) return;
 
-    const subject = appState.questionBankData.subjects[appState.selectedSubject];
+    const subject = questionBankData.subjects[appState.selectedSubject];
     const topicsHTML = Object.keys(subject.topics).map(topicKey => {
         const topic = subject.topics[topicKey];
         const questionCount = topic.questions.length;
@@ -330,9 +243,9 @@ function deselectAllTopics() {
 
 // Question functions
 function generateQuestions() {
-    if (!appState.selectedSubject || appState.selectedTopics.length === 0 || !appState.questionBankData) return;
+    if (!appState.selectedSubject || appState.selectedTopics.length === 0) return;
 
-    const subject = appState.questionBankData.subjects[appState.selectedSubject];
+    const subject = questionBankData.subjects[appState.selectedSubject];
     appState.currentQuestions = [];
 
     // Collect questions from selected topics
@@ -359,10 +272,8 @@ function generateQuestions() {
 }
 
 function displayQuestions() {
-    if (!appState.questionBankData) return;
-
-    const subject = appState.questionBankData.subjects[appState.selectedSubject];
-    elements.questionsSubjectTitle.textContent = `${subject.icon || '📚'} ${subject.name} Questions`;
+    const subject = questionBankData.subjects[appState.selectedSubject];
+    elements.questionsSubjectTitle.textContent = `${subject.icon} ${subject.name} Questions`;
 
     let questionsToShow = appState.currentQuestions;
 
@@ -416,8 +327,6 @@ function displayQuestions() {
 }
 
 function displayReviewQuestions() {
-    if (!appState.questionBankData) return;
-
     if (appState.reviewQuestions.length === 0) {
         elements.reviewList.innerHTML = `
             <div class="empty-state">
@@ -436,7 +345,7 @@ function displayReviewQuestions() {
     const reviewQuestionsData = [];
     appState.reviewQuestions.forEach(questionId => {
         const [subjectKey, topicKey, questionIndex] = questionId.split('-');
-        const subject = appState.questionBankData.subjects[subjectKey];
+        const subject = questionBankData.subjects[subjectKey];
         if (subject && subject.topics[topicKey]) {
             const topic = subject.topics[topicKey];
             const questionText = topic.questions[parseInt(questionIndex)];
@@ -446,14 +355,14 @@ function displayReviewQuestions() {
                     question: questionText,
                     topic: topic.name,
                     subject: subject.name,
-                    subjectIcon: subject.icon || '📚'
+                    subjectIcon: subject.icon
                 });
             }
         }
     });
 
     const reviewHTML = reviewQuestionsData.map((question, index) => `
-        <div class="question-card review-question">
+        <div class="question-card">
             <div class="question-header">
                 <span class="question-number">R${index + 1}</span>
                 <span class="question-subject">${question.subjectIcon} ${question.subject}</span>
@@ -518,12 +427,10 @@ function loadReviewQuestions() {
 
 // Header functions
 function populateHeaderSubjects() {
-    if (!appState.questionBankData) return;
-
-    const subjectOptions = Object.keys(appState.questionBankData.subjects).map(key => {
-        const subject = appState.questionBankData.subjects[key];
+    const subjectOptions = Object.keys(questionBankData.subjects).map(key => {
+        const subject = questionBankData.subjects[key];
         const selected = key === appState.selectedSubject ? 'selected' : '';
-        return `<option value="${key}" ${selected}>${subject.icon || '📚'} ${subject.name}</option>`;
+        return `<option value="${key}" ${selected}>${subject.icon} ${subject.name}</option>`;
     }).join('');
 
     elements.headerSubjectSelect.innerHTML = '<option value="">Choose a different subject...</option>' + subjectOptions;
