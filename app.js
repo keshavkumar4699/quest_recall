@@ -1,7 +1,6 @@
-// Study Buddy - Question Bank Application
-
 // Application state
 let appState = {
+    data: null, // Will hold the loaded JSON data
     selectedSubject: null,
     selectedTopics: [],
     currentQuestions: [],
@@ -15,8 +14,19 @@ let appState = {
 let elements = {};
 
 // Initialize application
-function init() {
-    console.log('Initializing Study Buddy...');
+async function init() {
+    console.log('Initializing Random Questions...');
+
+    try {
+        // Load JSON data
+        const response = await fetch('data.json');
+        appState.data = await response.json();
+        console.log('Data loaded successfully:', appState.data);
+    } catch (error) {
+        console.error('Failed to load data:', error);
+        alert('Failed to load question data. Please check if data.json exists.');
+        return;
+    }
 
     // Cache DOM elements
     cacheElements();
@@ -61,8 +71,6 @@ function cacheElements() {
         reviewList: document.getElementById('reviewList'),
 
         // Header
-        headerSearchContainer: document.getElementById('headerSearchContainer'),
-        headerSubjectSelect: document.getElementById('headerSubjectSelect'),
         toggleControls: document.getElementById('toggleControls'),
         randomizeToggle: document.getElementById('randomizeToggle'),
         reviewModeToggle: document.getElementById('reviewModeToggle'),
@@ -71,7 +79,9 @@ function cacheElements() {
         backToSubjectsBtn: document.getElementById('backToSubjectsBtn'),
         backToTopicsBtn: document.getElementById('backToTopicsBtn'),
         backFromReviewBtn: document.getElementById('backFromReviewBtn'),
-        changeSubjectBtn: document.getElementById('changeSubjectBtn')
+        
+        // App logo
+        appLogo: document.getElementById('appLogo')
     };
 }
 
@@ -79,7 +89,7 @@ function cacheElements() {
 function bindEvents() {
     // Subject selection
     elements.backToSubjectsBtn?.addEventListener('click', showSubjectSelection);
-    elements.changeSubjectBtn?.addEventListener('click', showSubjectSelection);
+    elements.appLogo?.addEventListener('click', showSubjectSelection);
 
     // Topic selection
     elements.selectAllTopicsBtn?.addEventListener('click', selectAllTopics);
@@ -90,9 +100,6 @@ function bindEvents() {
     // Review
     elements.backFromReviewBtn?.addEventListener('click', showQuestions);
 
-    // Header subject select
-    elements.headerSubjectSelect?.addEventListener('change', handleHeaderSubjectChange);
-
     // Toggles
     elements.randomizeToggle?.addEventListener('change', handleRandomizeToggle);
     elements.reviewModeToggle?.addEventListener('change', handleReviewModeToggle);
@@ -102,7 +109,6 @@ function bindEvents() {
 function showSubjectSelection() {
     hideAllViews();
     elements.subjectSelection?.classList.remove('hidden');
-    elements.headerSearchContainer?.classList.add('hidden');
     elements.toggleControls?.classList.add('hidden');
     appState.currentView = 'subjects';
 }
@@ -113,7 +119,7 @@ function showTopicSelection() {
     hideAllViews();
     elements.topicSelection?.classList.remove('hidden');
     elements.selectedSubjectTitle.textContent = 
-        `${questionBankData.subjects[appState.selectedSubject].icon} ${questionBankData.subjects[appState.selectedSubject].name} Topics`;
+        `${appState.data.subjects[appState.selectedSubject].icon} ${appState.data.subjects[appState.selectedSubject].name} Topics`;
 
     populateTopicGrid();
     appState.currentView = 'topics';
@@ -127,11 +133,7 @@ function showQuestions() {
 
     hideAllViews();
     elements.questionsContainer?.classList.remove('hidden');
-    elements.headerSearchContainer?.classList.remove('hidden');
     elements.toggleControls?.classList.remove('hidden');
-
-    // Update header with current subject
-    populateHeaderSubjects();
 
     // Generate questions
     generateQuestions();
@@ -158,8 +160,8 @@ function hideAllViews() {
 
 // Subject functions
 function populateSubjectCards() {
-    const subjectsHTML = Object.keys(questionBankData.subjects).map(subjectKey => {
-        const subject = questionBankData.subjects[subjectKey];
+    const subjectsHTML = Object.keys(appState.data.subjects).map(subjectKey => {
+        const subject = appState.data.subjects[subjectKey];
         const topicCount = Object.keys(subject.topics).length;
 
         return `
@@ -193,7 +195,7 @@ function selectSubject(subjectKey) {
 function populateTopicGrid() {
     if (!appState.selectedSubject) return;
 
-    const subject = questionBankData.subjects[appState.selectedSubject];
+    const subject = appState.data.subjects[appState.selectedSubject];
     const topicsHTML = Object.keys(subject.topics).map(topicKey => {
         const topic = subject.topics[topicKey];
         const questionCount = topic.questions.length;
@@ -245,7 +247,7 @@ function deselectAllTopics() {
 function generateQuestions() {
     if (!appState.selectedSubject || appState.selectedTopics.length === 0) return;
 
-    const subject = questionBankData.subjects[appState.selectedSubject];
+    const subject = appState.data.subjects[appState.selectedSubject];
     appState.currentQuestions = [];
 
     // Collect questions from selected topics
@@ -272,7 +274,7 @@ function generateQuestions() {
 }
 
 function displayQuestions() {
-    const subject = questionBankData.subjects[appState.selectedSubject];
+    const subject = appState.data.subjects[appState.selectedSubject];
     elements.questionsSubjectTitle.textContent = `${subject.icon} ${subject.name} Questions`;
 
     let questionsToShow = appState.currentQuestions;
@@ -304,7 +306,6 @@ function displayQuestions() {
             <div class="question-card" data-question-id="${question.id}">
                 <div class="question-header">
                     <span class="question-number">Q${index + 1}</span>
-                    <span class="question-topic">${question.topic}</span>
                     <button class="review-btn ${isReviewed ? 'active' : ''}" 
                             data-question-id="${question.id}"
                             title="${isReviewed ? 'Remove from review' : 'Mark for review'}">
@@ -345,7 +346,7 @@ function displayReviewQuestions() {
     const reviewQuestionsData = [];
     appState.reviewQuestions.forEach(questionId => {
         const [subjectKey, topicKey, questionIndex] = questionId.split('-');
-        const subject = questionBankData.subjects[subjectKey];
+        const subject = appState.data.subjects[subjectKey];
         if (subject && subject.topics[topicKey]) {
             const topic = subject.topics[topicKey];
             const questionText = topic.questions[parseInt(questionIndex)];
@@ -365,8 +366,6 @@ function displayReviewQuestions() {
         <div class="question-card">
             <div class="question-header">
                 <span class="question-number">R${index + 1}</span>
-                <span class="question-subject">${question.subjectIcon} ${question.subject}</span>
-                <span class="question-topic">${question.topic}</span>
                 <button class="review-btn active" 
                         data-question-id="${question.id}"
                         title="Remove from review">
@@ -423,24 +422,6 @@ function saveReviewQuestions() {
 
 function loadReviewQuestions() {
     appState.reviewQuestions = JSON.parse(localStorage.getItem('reviewQuestions') || '[]');
-}
-
-// Header functions
-function populateHeaderSubjects() {
-    const subjectOptions = Object.keys(questionBankData.subjects).map(key => {
-        const subject = questionBankData.subjects[key];
-        const selected = key === appState.selectedSubject ? 'selected' : '';
-        return `<option value="${key}" ${selected}>${subject.icon} ${subject.name}</option>`;
-    }).join('');
-
-    elements.headerSubjectSelect.innerHTML = '<option value="">Choose a different subject...</option>' + subjectOptions;
-}
-
-function handleHeaderSubjectChange() {
-    const selectedSubject = elements.headerSubjectSelect.value;
-    if (selectedSubject && selectedSubject !== appState.selectedSubject) {
-        selectSubject(selectedSubject);
-    }
 }
 
 // Toggle functions

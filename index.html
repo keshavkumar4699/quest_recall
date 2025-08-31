@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Buddy - Question Bank</title>
+    <title>Random Questions</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,16 +11,8 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <h1>Study Buddy</h1>
-                </div>
-
-                <!-- Subject search in header (initially hidden) -->
-                <div class="header-search-container hidden" id="headerSearchContainer">
-                    <select class="form-control subject-search" id="headerSubjectSelect">
-                        <option value="">Choose a different subject...</option>
-                    </select>
-                    <button class="btn btn--sm" id="changeSubjectBtn">Change</button>
+                <div class="logo" id="appLogo">
+                    <h1>Random Questions</h1>
                 </div>
 
                 <!-- Toggle Controls (initially hidden) -->
@@ -55,7 +47,7 @@
             <!-- Initial Subject Selection (center screen) -->
             <div class="subject-selection" id="subjectSelection">
                 <div class="welcome-section">
-                    <h1>Welcome to Study Buddy</h1>
+                    <h1>Welcome to Random Questions</h1>
                     <p>Choose your subject to start practicing questions</p>
                 </div>
 
@@ -117,7 +109,6 @@
     </main>
 
     <!-- Scripts -->
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
