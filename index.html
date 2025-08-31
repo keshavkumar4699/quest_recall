@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Questions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,29 +13,41 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo" id="appLogo">
+                    <div class="logo-icon">
+                        <i class="fas fa-random"></i>
+                    </div>
                     <h1>Random Questions</h1>
                 </div>
 
-                <!-- Toggle Controls (initially hidden) -->
-                <div class="toggle-controls hidden" id="toggleControls">
-                    <div class="toggle-group">
-                        <label class="toggle-label">
-                            <span class="toggle-text">Randomize</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="randomizeToggle" class="toggle-input">
-                                <span class="toggle-slider"></span>
-                            </div>
-                        </label>
-                    </div>
+                <div class="header-actions">
+                    <!-- Marked Questions Button (visible only on homepage) -->
+                    <button class="reviewed-btn hidden" id="markedQuestionsBtn">
+                        <i class="fas fa-bookmark"></i>
+                        Marked Questions
+                        <span class="reviewed-count" id="markedCount">0</span>
+                    </button>
 
-                    <div class="toggle-group">
-                        <label class="toggle-label">
-                            <span class="toggle-text">Review Mode</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="reviewModeToggle" class="toggle-input">
-                                <span class="toggle-slider"></span>
-                            </div>
-                        </label>
+                    <!-- Toggle Controls (initially hidden) -->
+                    <div class="toggle-controls hidden" id="toggleControls">
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <span class="toggle-text">Randomize</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="randomizeToggle" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <span class="toggle-text">Review Mode</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="reviewModeToggle" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,9 +109,13 @@
             <!-- Review Questions -->
             <div class="review-container hidden" id="reviewContainer">
                 <div class="review-header">
-                    <h2>Review Questions</h2>
+                    <h2>Marked Questions</h2>
                     <p id="reviewStats">0 questions marked for review</p>
-                    <button class="btn" id="backFromReviewBtn">← Back</button>
+                    <div class="review-actions">
+                        <button class="btn btn--accent" id="randomizeMarkedBtn">
+                            <i class="fas fa-random"></i> Randomize Marked Questions
+                        </button>
+                    </div>
                 </div>
 
                 <div class="review-list" id="reviewList">
@@ -108,7 +125,6 @@
         </div>
     </main>
 
-    <!-- Scripts -->
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
