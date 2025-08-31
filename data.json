@@ -141,6 +141,24 @@
       "icon": "🏛️",
       "color": "#f368e0",
       "topics": {
+        "historical background":{
+          "name": "Historical Background",
+          "questions": [
+            "what was the first step taken by the British to establish their control on East India Company? and when?",
+            "What were the two main provisions of the Regulating Act of 1773?",
+            "When was the Supreme Court of Calcutta established and what was its significance?",
+            "What were the 4 main provisions of the Settlement or Declaratory Act of 1781? And what what was the other name of this act?",
+            "When was the first time dual government was established in India and what were its two main features?",
+            "What were the main provisions of Act of 1786?",
+            "What two main powers that were given to the Governor-General by the Act of 1793? And what was the other name of this act?",
+            "What happened to commander in chief of the British army in India as per the Act of 1793?",
+            "What were the main provisions of the Act of 1793?",
+            "Which act ended the trade monopoly of the East India Company and when was it passed? To what extenet did it end the monopoly?",
+            "When was the Consitutional position of British terriories in India explicitly defined and what were the main provisions of this act?", 
+            "How Charter Act of 1813 affected the Indian Culture and Education?", 
+            "When the seaparation of powers of Governor generals's executive and legislative functions was done and what were the main provisions of this act?"
+          ]
+        },
         "constitution": {
           "name": "Constitution of India",
           "questions": [
