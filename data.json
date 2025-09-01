@@ -107,6 +107,20 @@
       "icon": "💹",
       "color": "#1dd1a1",
       "topics": {
+        "basicsofEconomics": {
+          "name": "Basics of Economics",
+          "questions": [
+            "What is the difference between microeconomics and macroeconomics?",
+            "What do you undrstand by Primary, Secondary and Tertiary sectors of economy? Give examples.",
+            "What is law of Supply and Demand? ",
+            "How Demand, Supply and Price are related to each other?",
+            "Categorise goods into Normal, Inferior, Giffen and Veblen goods with examples. And what happens to law of demand in each case?",
+            "Categorize goods into Complementary and Substitute goods with examples. And what happens to demand of one when price of other changes? And what happens to law of demand in each case?",
+            "What is the difference between Consumption Goods and Capital Goods? Give examples.",
+            "Give three step process to identify Capital Goods from Intermediate Goods and Consumption Goods.",
+            "What does investment in Asset and Capital goods lead to?"
+          ]
+        },
         "microeconomics": {
           "name": "Microeconomics",
           "questions": [
