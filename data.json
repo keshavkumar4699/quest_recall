@@ -141,7 +141,7 @@
       "icon": "🏛️",
       "color": "#f368e0",
       "topics": {
-        "historical background":{
+        "historicalBackground":{
           "name": "Historical Background",
           "questions": [
             "what was the first step taken by the British to establish their control on East India Company? and when?",
@@ -155,26 +155,152 @@
             "What were the main provisions of the Act of 1793?",
             "Which act ended the trade monopoly of the East India Company and when was it passed? To what extenet did it end the monopoly?",
             "When was the Consitutional position of British terriories in India explicitly defined and what were the main provisions of this act?", 
-            "How Charter Act of 1813 affected the Indian Culture and Education?", 
-            "When the seaparation of powers of Governor generals's executive and legislative functions was done and what were the main provisions of this act?"
+            "How Charter Act of 1813 affected the Indian Culture and Education? And what steps were taken in this direction?",
+            "Which act led to the formation of Governor General of India and who was the first Governor General of India? What was the effect of this act on other governor generals?",
+            "What was the effect of the Act of 1833 on the East India Company?",
+            "Which act led to the codification of Indian Laws and who was the person responsible for it?",
+            "What social reforms were introduced by the Act of 1833?",
+            "What changes were made in Charter Act of 1833 regarding europeans?",
+            "Which act for the first time introduced local representation in the governance of India and what part of governance they were part of?",
+            "Which act introcued the open competition system for the recruitment of civil servants in India and when was it passed?",
+            "How did the Governor General Council expanded over the years?",
+            "Which act is also known as the Act for the Good Government of India and what were its main provisions?",
+            "What was the doctrine of lapse and what act ended it?",
+            "What did the Government of India Act of 1858 do to give control to the British parliament over India?",
+            "What was the Council of India and when was it established and when it ended?",
+            "What were the two main provisions for Seceretary of State for India as per the Government of India Act of 1858?",
+            "Which act again initiated the process of decentralization of administration in India which were taken away through Charter Act of 1833 and How?",
+            "How did Indian Councils Act of 1861 changed the local governance in India?",
+            "What were three main provisions realted to Viceroy as per the Indian Councils Act of 1861?", 
+            "Which act gave the recognition to portfolio system in India and when was it passed?",
+            "What were thre main provisions of Morley Minto Reforms? And when were they passed?",
+            "Who was the first Indian to be appointed as a member of the Viceroy's Executive Council and when?",
+            "What wa the element of elections introduced by the Indian Councils Act of 1909?",
+            "What were the three major reforms introduced by the Government of India Act of 1919 fragment of which are still found in our Governance?",
+            "What was the Diarchy in provinces? when and why was it introduced?",
+            "Which act led to the creation of High Commmissioner of India in London?",
+            "Which act made sure Secretary of State was to be paid from the British revenues and not from the Indian revenues?",
+            "Which act led to the establishment of All India Federation and why it never came into existance?",
+            "Which act introduced responsible government at the provincial level?",
+            "Which act introduced responsible government and what does responsible government mean?",
+            "What were the main 3 institutions established as per the Government of India Act of 1935? And when were they established?",
+            "WHich act under the british government for the first time gave the communal representation to the minorities, women and labour class?",
+            "What replaced dyarchy in provinces and when?",
+            "How did the Government of India Act of 1935 affect the powers of the Viceroy and Secratry of State?",
+            "When was the bicameral system of legislature expanded to more provinces and which act?",
+            "Which prime minister of UK announced the plan for the transfer of power in India?",
+            "Under the Indian Independence Act of 1947, Secretary of State power was transferred to whom?"
           ]
         },
-        "constitution": {
-          "name": "Constitution of India",
+        "makingOfConstitution": {
+          "name": "Making of the Constitution of India",
           "questions": [
-            "Describe the key features of the Indian Constitution",
-            "What are the fundamental rights guaranteed by the Constitution?",
-            "Explain the amendment process of the Indian Constitution",
-            "What is the significance of the Directive Principles of State Policy?"
+            "Who gave the idea of a Constituent Assembly for India and when?",
+            "When was the demand for Constituent Assembly was raised by the Indian National Congress?",
+            "What was idea for formation of Constituent Assembly given by Nehru?",
+            "When was the Constituent Assembly for India demand was accepted by the British government and what was it named?",
+            "When was the first draft proposal for the framing of the constitution was made and by whom?",
+            "When was the Constituent Assembly for India was formed and how many members were there in it?",
+            "How were the members of the Constituent Assembly for India were elected?",
+            "When did the first meeting of the Constituent Assembly for India took place and who was elected as its president and why?",
+            "When did the rajendra Prasad elected as the permanent president of the Constituent Assembly for India and who were the vice presidents?",
+            "What was Objectives Resolution and who moved it and when? And when was it adopted?",
+            "When was the Mountbatten Plan was proposed?",
+            "What powers were given to constituent assembly as per the Indian Independence Act of 1947?",
+            "How was the chairman ship was divided in the Constituent Assembly for India?",
+            "What were the other function performed by the Constituent Assembly for India apart from framing the constitution?",
+            "When was the Drafting Committee was formed and who was its chairman?",
+            "Who were the seven members of the Drafting Committee?",
+            "During Adoption of the Constitution, what provisions were immediately adopted?",
+            "How many parts, articles and schedules were there in consitution at the time of its adoption?"
           ]
         },
-        "politicalSystem": {
-          "name": "Political System",
+        "salientFeatures": {
+          "name": "Salient Features of the Constitution",
           "questions": [
-            "Describe the structure and functions of the Indian Parliament",
-            "What are the powers and responsibilities of the President of India?",
-            "Explain the role of the Supreme Court in Indian democracy",
-            "How does the electoral system work in India?"
+            "How are three pillars of democracy are established through the constitution and how they are related to each other?",
+            "How British Parliamentary sytem is different from Indian Parliamentary system?",
+            "What is the other name of Parliamentary form of government?",
+            "How Indian judiciary is different from American judiciary?",
+            "What features of Indain Constitution are borrowed from Irish Constitution?",
+            "What features of Indian Constitution are borrowed from Canadian Constitution?",
+            "What features of Indian Constitution are borrowed from Australian Constitution?",
+            "What features of Indian Constitution are borrowed from South African Constitution?",
+            "What features of Indian Constitution are borrowed from Weimar Constitution of Germany?",
+            "What features of Indian Constitution are borrowed from British Constitution?",
+            "What features of Indian Constitution are borrowed from U.S. Constitution?",
+            "What features of Indian Constitution are borrowed from U.S.S.R Constitution?",
+            "What features of Indian Constitution are borrowed from Japanese Constitution?",
+            "What features of Indian Constitution are borrowed from French Constitution?",
+            "What features of Indian Constitution are borrowed from Government of India Act of 1935?"
+          ]
+        },
+        "preamble": {
+          "name": "Preamble",
+          "questions": [
+            "What does the Preamble of the Constitution reflect?",
+            "When was it amended and what was amended?",
+            "What is meaning of word 'Sovereign' in the Preamble?",
+            "What is meaning of word 'Socialist' in the Preamble? And when was it added?",
+            "How indian socialism is different from the socialism of other countries? And what is it called?",
+            "What is the inspiration of Indian Socialism?",
+            "What is meaning of word Secular in the Preamble? How is it different from the western concept of secularism?",
+            "In what session congress party adopted the resolution to establish a'socialistic pattern of society' in India?",
+            "What is doctrine of popular sovereignty and how it calls into the activity the intelligence and character of ordinary man and woman?",
+            "What is direct democracy? What are its four devices? Where it is exercised ?",
+            "What is the meaning of 'Referendum' in direct democracy?",
+            "What is the meaning of 'Initiative' in direct democracy?",
+            "What is the meaning of 'Recall' in direct democracy?",
+            "What is the meaning of 'Plebiscite' in direct democracy?",
+            "What is Indirect democracy?",
+            "What is union of trinity?",
+            "What is the meaning of 'Republic' in the Preamble?",
+            "What are two most important features of republic?",
+            "What is the meaning of 'Democratic' in the Preamble?",
+            "What is the meaning of 'Justice' in the Preamble? What are its three dimensions?",
+            "What is the meaning of 'Liberty' in the Preamble? What are its two dimensions?",
+            "What is the meaning of 'Equality' in the Preamble? What are its three dimensions?",
+            "What is the meaning of 'Fraternity' in the Preamble? What are its two dimensions?",
+            "Which Supreme Court case declared the Preamble as not a part of the Constitution but a key to open its mind?",
+            "Which Supreme Court case declared the Preamble as a part of the Constitution?",
+            "Which Supreme Court case declared that the Preamble is the soul of the Constitution?",
+            "Which part of constitution was independently enacted by the Constituent Assembly?",
+            "How preamble is different from the other parts of the constitution?",
+            "How preamble is related to powers of legislature?",
+            "Is preamble justiciable?"
+          ]
+        },
+        "unionAndItsTerritory": {
+          "name": "Union and its Territory",
+          "questions": [
+            "What does Article 1 of the Constitution state?",
+            "What are two reasons for which India is called a 'Union of States' not 'Federation of States'?",
+            "Under which article of the constitution the territory of India is defined? and what does it include?",
+            "What is given in the First Schedule of the Constitution?",
+            "What are two powers given to the Parliament regarding the admission or establishment of new states in India and under which article?",
+            
+          ]
+        },
+        "citizenship": {
+          "name": "Citizenship",
+          "questions": [
+            "What are the different ways in which a person can acquire Indian citizenship?",
+            "What are the rights and duties of Indian citizens as per the Constitution?",
+            "How can Indian citizenship be terminated or revoked?",
+            "What is the significance of the Citizenship Amendment Act, 2019?"
+          ]
+        },
+        "fundamentalRights": {
+          "name": "Fundamental Rights",
+          "questions": [
+            "What are the six fundamental rights guaranteed by the Indian Constitution?",
+            "Explain the significance of the Right to Equality (Articles 14-18)",
+            "Describe the Right to Freedom (Articles 19-22) and its limitations",
+            "What is the Right against Exploitation (Articles 23-24) and how does it protect citizens?",
+            "Explain the Right to Freedom of Religion (Articles 25-28)",
+            "What is the Cultural and Educational Rights (Articles 29-30) and who does it protect?",
+            "Describe the Right to Constitutional Remedies (Article 32) and its importance",
+            "What are the exceptions to the fundamental rights in India?"
           ]
         },
         "governance": {
