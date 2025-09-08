@@ -1,130 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Random Questions</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <!-- Header -->
     <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo" id="appLogo">
-                    <div class="logo-icon">
-                        <i class="fas fa-random"></i>
-                    </div>
-                    <h1>Random Questions</h1>
-                </div>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo" id="appLogo">
+            <span class="logo-icon">🎲</span>
+            <h1>Random Questions</h1>
+          </div>
 
-                <div class="header-actions">
-                    <!-- Marked Questions Button (visible only on homepage) -->
-                    <button class="reviewed-btn hidden" id="markedQuestionsBtn">
-                        <i class="fas fa-bookmark"></i>
-                        Marked Questions
-                        <span class="reviewed-count" id="markedCount">0</span>
-                    </button>
+          <div class="header-actions">
+            <!-- Marked Questions Button -->
+            <button class="important-btn" id="markedQuestionsBtn">
+              <span>Important Questions</span>
+              <span class="important-count" id="markedCount">0</span>
+            </button>
 
-                    <!-- Toggle Controls (initially hidden) -->
-                    <div class="toggle-controls hidden" id="toggleControls">
-                        <div class="toggle-group">
-                            <label class="toggle-label">
-                                <span class="toggle-text">Randomize</span>
-                                <div class="toggle-switch">
-                                    <input type="checkbox" id="randomizeToggle" class="toggle-input">
-                                    <span class="toggle-slider"></span>
-                                </div>
-                            </label>
-                        </div>
+            <!-- Toggle Controls -->
+            <div class="toggle-controls" id="toggleControls">
+              <div class="toggle-group">
+                <label class="toggle-label">
+                  <span class="toggle-text">Randomize</span>
+                  <div class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      class="toggle-input"
+                      id="randomizeToggle"
+                    />
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
 
-                        <div class="toggle-group">
-                            <label class="toggle-label">
-                                <span class="toggle-text">Review Mode</span>
-                                <div class="toggle-switch">
-                                    <input type="checkbox" id="reviewModeToggle" class="toggle-input">
-                                    <span class="toggle-slider"></span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+              <div class="toggle-group">
+                <label class="toggle-label">
+                  <span class="toggle-text">Important Question</span>
+                  <div class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      class="toggle-input"
+                      id="importantModeToggle"
+                    />
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="container">
-            <!-- Initial Subject Selection (center screen) -->
-            <div class="subject-selection" id="subjectSelection">
-                <div class="welcome-section">
-                    <h1>Welcome to Random Questions</h1>
-                    <p>Choose your subject to start practicing questions</p>
-                </div>
+      <div class="container">
+        <!-- Subject Selection -->
+        <section class="subject-selection" id="subjectSelection">
+          <div class="welcome-section">
+            <h1>Choose Your Study Subject</h1>
+            <p>Select a subject to start your focused study session</p>
+          </div>
 
-                <div class="subject-cards" id="subjectCards">
-                    <!-- Subject cards will be populated here -->
-                </div>
+          <div class="subject-cards" id="subjectCards">
+            <!-- Subject cards will be populated by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Topic Selection -->
+        <section class="topic-selection hidden" id="topicSelection">
+          <div class="section-header">
+            <button class="btn" id="backToSubjectsBtn" title="Back to subjects">
+              ← Back
+            </button>
+            <div class="header-content-wrapper">
+              <h2 id="selectedSubjectTitle">Select Topics</h2>
+              <div class="question-count-info" id="questionCountInfo">
+                0 questions available
+              </div>
             </div>
+          </div>
 
-            <!-- Topic Selection -->
-            <div class="topic-selection hidden" id="topicSelection">
-                <div class="section-header">
-                    <button class="btn" id="backToSubjectsBtn">← Back to Subjects</button>
-                    <h2 id="selectedSubjectTitle">Select Topics</h2>
-                </div>
+          <div class="topic-grid" id="topicGrid">
+            <!-- Topic cards will be populated by JavaScript -->
+          </div>
 
-                <div class="topic-grid" id="topicGrid">
-                    <!-- Topic cards will be populated here -->
-                </div>
-
-                <div class="action-section">
-                    <div class="select-controls">
-                        <button class="btn btn--outline" id="selectAllTopicsBtn">Select All</button>
-                        <button class="btn btn--outline" id="deselectAllTopicsBtn">Deselect All</button>
-                    </div>
-                    <button class="btn btn--primary btn--lg" id="startStudyingBtn" disabled>
-                        Start Studying
-                    </button>
-                </div>
+          <div class="action-section">
+            <div class="select-controls">
+              <button class="btn btn--outline" id="selectAllTopicsBtn">
+                Select All
+              </button>
+              <button class="btn btn--outline" id="deselectAllTopicsBtn">
+                Deselect All
+              </button>
             </div>
+            <button class="btn btn--primary btn--lg" id="startStudyingBtn">
+              Start Studying
+            </button>
+          </div>
+        </section>
 
-            <!-- Questions Display -->
-            <div class="questions-container hidden" id="questionsContainer">
-                <div class="questions-header">
-                    <div class="subject-info">
-                        <h2 id="questionsSubjectTitle">Mathematics Questions</h2>
-                        <p id="questionStats">0 questions</p>
-                    </div>
-                    <button class="btn" id="backToTopicsBtn">← Back to Topics</button>
-                </div>
-
-                <div class="questions-list" id="questionsList">
-                    <!-- Questions will be populated here -->
-                </div>
+        <!-- Questions Container -->
+        <section class="questions-container hidden" id="questionsContainer">
+          <div class="questions-header">
+            <div class="subject-info">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 4px;
+                "
+              >
+                <h2 id="questionsSubjectTitle">Questions</h2>
+                <button class="btn btn--sm" id="backToTopicsBtn">
+                  ← Topics
+                </button>
+              </div>
+              <p id="questionStats">Loading questions...</p>
             </div>
+          </div>
 
-            <!-- Review Questions -->
-            <div class="review-container hidden" id="reviewContainer">
-                <div class="review-header">
-                    <h2>Marked Questions</h2>
-                    <p id="reviewStats">0 questions marked for review</p>
-                    <div class="review-actions">
-                        <button class="btn btn--accent" id="randomizeMarkedBtn">
-                            <i class="fas fa-random"></i> Randomize Marked Questions
-                        </button>
-                    </div>
-                </div>
+          <!-- Single Questions Box -->
+          <div class="questions-box" id="questionsBox">
+            <!-- Questions will be populated by JavaScript -->
+          </div>
+        </section>
 
-                <div class="review-list" id="reviewList">
-                    <!-- Review questions will be populated here -->
-                </div>
+        <!-- Important Questions Container -->
+        <section class="important-container hidden" id="importantContainer">
+          <div class="important-header">
+            <div class="subject-info">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 4px;
+                "
+              >
+                <h2>⭐ Important Questions</h2>
+                <button class="btn btn--sm" id="backFromImportantBtn">
+                  ← Back
+                </button>
+              </div>
+              <p id="importantStats">Loading important questions...</p>
+
+              <div class="important-actions">
+                <button class="btn btn--outline" id="randomizeMarkedBtn">
+                  🔀 Randomize Order
+                </button>
+              </div>
             </div>
-        </div>
+          </div>
+
+          <!-- Important Questions Box -->
+          <div class="questions-box" id="importantBox">
+            <!-- Important questions will be populated by JavaScript -->
+          </div>
+        </section>
+      </div>
     </main>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>
