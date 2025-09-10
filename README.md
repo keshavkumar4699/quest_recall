@@ -50,6 +50,14 @@ An intelligent study application with advanced question tracking and progress ma
 
 Works on all modern browsers including Chrome, Firefox, Safari, and Edge.
 
+## UPCOMING FEATURES
+- mark for review option and mark important question
+- 7 layers of colors to mark the number of times question has been revised
+- these numbers will displayed on the first page of the app
+- voice to ask questions, give gaps, mark questions on voice commands
+- custom question maker
+- make revision sheet for exams
+
 ---
 
 Enjoy your enhanced study experience! 📖✨
