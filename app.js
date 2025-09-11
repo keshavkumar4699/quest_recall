@@ -909,8 +909,27 @@ class QuestRecallApp {
       subjectBtn.addEventListener("click", () => this.showSubjectsPage());
     if (randomizeBtn)
       randomizeBtn.addEventListener("click", () => this.toggleRandomization());
-    if (importantBtn)
-      importantBtn.addEventListener("click", () => this.showImportantPage());
+    if (importantBtn) {
+      importantBtn.addEventListener("click", () => {
+        this.showingImportant = !this.showingImportant;
+        this.currentFilter.topicKey = null;
+
+        document.getElementById("homePage").classList.remove("active");
+        document.getElementById("subjectPage").classList.remove("active");
+        document.getElementById("topicPage").classList.remove("active");
+        document.getElementById("importantPage").classList.remove("active");
+
+        if (this.showingImportant) {
+          document.getElementById("importantPage").classList.add("active");
+          this.renderImportantQuestions();
+        } else {
+          document.getElementById("homePage").classList.add("active");
+          this.renderHome();
+        }
+
+        this.updateStats();
+      });
+    }
 
     // Back buttons
     const backToHome = document.getElementById("backToHome");
