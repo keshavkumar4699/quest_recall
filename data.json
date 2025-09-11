@@ -214,8 +214,34 @@
         "banking": {
           "name": "Banking",
           "questions": [
-            "What are BFI, NBFC, AFI?",
-            "What are the types of BFI?"
+            "What is BFI? Give all of its types and subtypes.", 
+            "What is NBFC?",
+            "What is AFI? Give examples.",
+            "Is SEBI AFI?",
+            "What are the types of BFI?",
+            "5 features on which each bank is judged?",
+            "Why payments banks do not do PSL",
+            "Under which act RBI has the powers to regulate banks?",
+            "What is minimum reserve ratio?",
+            "When was RBI established?",
+            "What are the four main functions of RBI?",
+            "List 5 reports released by the RBI",
+            "What is listed under the schedule II of the RBI Act?",
+            "What is Scheduled Commercial Banks? Whats is its criteria?",
+            "What are the benefits of being scheduled commercial banks?",
+            "When does a bank is called PSBS? Map them on all criteria. Give Examples.",
+            "What is required for being a Private Bank? Map them on all criteria. Give Examples.",
+            "When does a bank is called a foreign bank? Map them on all criteria.",
+            "What is D-SIB? When does a bank is called D-SIB?",
+            "List all banks in India that are D-SIB",
+            "What are RRBs? What is its ownership structure, statutory status? And map them on all criteria.",
+            "What are SFBs? What is its ownership structure, statutory status? And map them on all criteria.",
+            "What are Payment Banks? What is its ownership structure, statutory status? And map them on all criteria.",
+            "What are Cooperative Banks? What is its ownership structure, statutory status? And map them on all criteria.",
+            "What are the types and subtypes of Cooperative Banks?",
+            "What are the types of Long Term Cooperative Banks?",
+            "What are the types of Short Term Cooperative Banks?",
+            "What is PACS? Who regulates them and Why?"
           ]
         }
       }
@@ -419,7 +445,17 @@
             "What is EPROM",
             "What is EEEROM",
             "What is SRAM",
-            "What is DRAM"
+            "What is DRAM",
+            "What is North and South Bridge in motherboard and what is difference between them.",
+            "What is PCI Slot? What is its use.",
+            "What is AGP Slot? What is it used for.",
+            "What is BUS?",
+            "What are the types of BUS?",
+            "What is Von-neumen architecture?",
+            "What is Harvard Architecture?",
+            "What is ADAS?",
+            "What is MICR?",
+            "What is OMR?"
           ]
         }
       }
