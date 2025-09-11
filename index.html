@@ -1,134 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QuestRecall - Spaced Repetition Learning</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="logo">QuestRecall</h1>
-                <div class="header-actions">
-                    <button id="randomizeBtn" class="btn btn--outline btn--sm">
-                        🎲 Randomize
-                    </button>
-                    <button id="importantBtn" class="btn btn--outline btn--sm">
-                        ⭐ Important
-                    </button>
-                    <button id="subjectBtn" class="btn btn--primary btn--sm">
-                        📚 Change Subject
-                    </button>
-                </div>
-            </div>
-        </header>
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1 class="logo" id="appLogo" style="cursor:pointer">QuestRecall</h1>
+          <div class="header-actions">
+            <button id="randomizeBtn" class="btn btn--outline btn--sm">
+              🎲 Randomize
+            </button>
+            <button id="importantBtn" class="btn btn--outline btn--sm">
+              ⭐ Important
+            </button>
+            <button id="subjectBtn" class="btn btn--primary btn--sm">
+              📚 Change Subject
+            </button>
+          </div>
+        </div>
+      </header>
 
-        <!-- Statistics Dashboard -->
-        <section class="stats-dashboard">
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-value" id="cardsDue">0</div>
-                    <div class="stat-label">Cards Due Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="streak">0</div>
-                    <div class="stat-label">Day Streak</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="cardsCompleted">0</div>
-                    <div class="stat-label">Completed Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="dueQuestions">0</div>
-                    <div class="stat-label">Due Questions</div>
-                </div>
-            </div>
-        </section>
+      <!-- Statistics Dashboard -->
+      <section class="stats-dashboard">
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-value" id="cardsDueToday">0</div>
+            <div class="stat-label">Due Today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="dueOverall">0</div>
+            <div class="stat-label">Due Overall</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="retention">0%</div>
+            <div class="stat-label">Retention</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="progress">0</div>
+            <div class="stat-label">+ Progress</div>
+          </div>
+        </div>
+      </section>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Home Page -->
-            <div id="homePage" class="page active">
-                <div class="current-subject">
-                    <span id="currentSubjectText">All Subjects</span>
-                    <button id="clearFilter" class="btn btn--outline btn--sm hidden">Clear Filter</button>
-                </div>
-                
-                <div class="questions-container" id="questionsContainer">
-                    <!-- Question cards will be inserted here -->
-                </div>
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+          <div class="current-subject">
+            <span id="currentSubjectText">All Subjects</span>
+            <button id="clearFilter" class="btn btn--outline btn--sm hidden">
+              Clear Filter
+            </button>
+          </div>
 
-                <div id="noQuestions" class="no-questions hidden">
-                    <div class="no-questions-icon">🎉</div>
-                    <h3>All Done for Today!</h3>
-                    <p>You've completed all your due cards. Great work!</p>
-                    <button id="addMoreBtn" class="btn btn--primary">Practice More</button>
-                </div>
-            </div>
+          <div class="questions-container" id="questionsContainer">
+            <!-- Question cards will be inserted here -->
+          </div>
 
-            <!-- Subject Selection Page -->
-            <div id="subjectPage" class="page">
-                <div class="page-header">
-                    <button id="backToHome" class="btn btn--outline">← Back to Home</button>
-                    <h2>Select Subject</h2>
-                </div>
-                
-                <div class="subjects-grid" id="subjectsGrid">
-                    <!-- Subject cards will be inserted here -->
-                </div>
-            </div>
+          <div id="noQuestions" class="no-questions hidden">
+            <div class="no-questions-icon">🎉</div>
+            <h3>All Done for Today!</h3>
+            <p>You've completed all your due cards. Great work!</p>
+            <button id="addMoreBtn" class="btn btn--primary">
+              Practice More
+            </button>
+          </div>
+        </div>
 
-            <!-- Important Questions Page -->
-            <div id="importantPage" class="page">
-                <div class="page-header">
-                    <button id="backToHomeFromImportant" class="btn btn--outline">← Back to Home</button>
-                    <h2>Important Questions</h2>
-                </div>
-                
-                <div class="questions-container" id="importantQuestionsContainer">
-                    <!-- Important question cards will be inserted here -->
-                </div>
+        <!-- Subject Selection Page -->
+        <div id="subjectPage" class="page">
+          <div class="page-header">
+            <button id="backToHome" class="btn btn--outline">
+              ← Back to Home
+            </button>
+            <h2>Select Subject</h2>
+          </div>
 
-                <div id="noImportantQuestions" class="no-questions hidden">
-                    <div class="no-questions-icon">⭐</div>
-                    <h3>No Important Questions</h3>
-                    <p>You haven't marked any questions as important yet.</p>
-                </div>
-            </div>
-        </main>
+          <div class="subjects-grid" id="subjectsGrid">
+            <!-- Subject cards will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Important Questions Page -->
+        <div id="importantPage" class="page">
+          <div class="page-header">
+            <button id="backToHomeFromImportant" class="btn btn--outline">
+              ← Back to Home
+            </button>
+            <h2>Important Questions</h2>
+          </div>
+
+          <div class="questions-container" id="importantQuestionsContainer">
+            <!-- Important question cards will be inserted here -->
+          </div>
+
+          <div id="noImportantQuestions" class="no-questions hidden">
+            <div class="no-questions-icon">⭐</div>
+            <h3>No Important Questions</h3>
+            <p>You haven't marked any questions as important yet.</p>
+          </div>
+        </div>
+      </main>
     </div>
 
     <!-- Rating Modal -->
     <div id="ratingModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="question-card-large">
-                <div class="question-header">
-                    <span class="subject-badge" id="modalSubject"></span>
-                    <button class="star-btn" id="modalStarBtn">⭐</button>
-                </div>
-                <div class="question-text" id="modalQuestion"></div>
-                <div class="rating-buttons">
-                    <button class="rating-btn rating-again" data-rating="again">
-                        Again<br><span class="rating-time">Same day</span>
-                    </button>
-                    <button class="rating-btn rating-hard" data-rating="hard">
-                        Hard<br><span class="rating-time">1 day</span>
-                    </button>
-                    <button class="rating-btn rating-medium" data-rating="medium">
-                        Medium<br><span class="rating-time">2 days</span>
-                    </button>
-                    <button class="rating-btn rating-easy" data-rating="easy">
-                        Easy<br><span class="rating-time">4 days</span>
-                    </button>
-                </div>
-            </div>
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="question-card-large">
+          <div class="question-header">
+            <span class="subject-badge" id="modalSubject"></span>
+            <button class="star-btn" id="modalStarBtn">⭐</button>
+          </div>
+          <div class="question-text" id="modalQuestion"></div>
+          <div class="rating-buttons">
+            <button class="rating-btn rating-again" data-rating="again">
+              Again<br /><span class="rating-time">Same day</span>
+            </button>
+            <button class="rating-btn rating-hard" data-rating="hard">
+              Hard<br /><span class="rating-time">1 day</span>
+            </button>
+            <button class="rating-btn rating-medium" data-rating="medium">
+              Medium<br /><span class="rating-time">2 days</span>
+            </button>
+            <button class="rating-btn rating-easy" data-rating="easy">
+              Easy<br /><span class="rating-time">4 days</span>
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>

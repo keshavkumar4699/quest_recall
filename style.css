@@ -1269,6 +1269,24 @@ select.form-control {
   animation: spin 1s linear infinite;
 }
 
+/* Add this to your existing CSS */
+.stats-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-12);
+}
+
+.stat-card {
+    padding: var(--space-12);
+}
+
+.stat-value {
+    font-size: var(--font-size-xl);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

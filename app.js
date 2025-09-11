@@ -8,493 +8,65 @@ class QuestRecallApp {
     this.stats = this.loadStats();
     this.currentQuestionId = null;
     this.showingImportant = false;
-
     this.init();
   }
 
-  init() {
-    this.loadSubjectsData();
-    this.generateQuestions();
-    this.loadQuestionStates();
-    this.renderHome();
-    this.renderSubjects();
-    this.updateStats();
-    this.bindEvents();
+  // Initialize the app
+  async init() {
+    try {
+      await this.loadSubjectsData();
+      this.generateQuestions();
+      this.loadQuestionStates();
+      this.renderHome();
+      this.renderSubjects();
+      this.updateStats();
+      this.bindEvents();
+    } catch (error) {
+      console.error("Error during initialization:", error);
+    }
   }
 
-  // Load subjects data from the provided JSON
-  loadSubjectsData() {
-    this.subjects = {
-      indianFreedomStruggle: {
-        name: "Indian Freedom Struggle",
-        icon: "🇮🇳",
-        color: "#ff6b6b",
-        topics: {
-          preIndependence: {
-            name: "Pre-Independence Era",
-            questions: [
-              "What were the main causes of the Indian Rebellion of 1857?",
-              "Describe the role of the Indian National Congress in the freedom struggle",
-              "Explain the significance of the Partition of Bengal in 1905",
-              "What was the impact of World War I on India's freedom movement?",
-            ],
-          },
-          keyMovements: {
-            name: "Key Movements",
-            questions: [
-              "What were the main features of the Non-Cooperation Movement?",
-              "Describe the events of the Salt Satyagraha",
-              "Explain the Quit India Movement and its consequences",
-              "What was the significance of the Swadeshi Movement?",
-            ],
-          },
-          prominentLeaders: {
-            name: "Prominent Leaders",
-            questions: [
-              "Describe Mahatma Gandhi's philosophy of Satyagraha",
-              "What was Subhas Chandra Bose's contribution to the freedom struggle?",
-              "Explain Jawaharlal Nehru's vision for independent India",
-              "What role did Bhagat Singh play in the Indian independence movement?",
-            ],
-          },
-        },
-      },
-      artCulture: {
-        name: "Art and Culture",
-        icon: "🎨",
-        color: "#ff9ff3",
-        topics: {
-          indianArchitecture: {
-            name: "Indian Architecture",
-            questions: [
-              "Describe the key features of Mughal architecture",
-              "What are the distinguishing characteristics of Dravidian architecture?",
-              "Explain the significance of temple architecture in ancient India",
-              "How did colonial rule influence Indian architecture?",
-            ],
-          },
-          performingArts: {
-            name: "Performing Arts",
-            questions: [
-              "Describe the eight classical dance forms of India",
-              "What are the key elements of Indian classical music?",
-              "Explain the history and significance of Sanskrit theater",
-              "How are folk performing arts different from classical forms?",
-            ],
-          },
-          visualArts: {
-            name: "Visual Arts",
-            questions: [
-              "Describe the evolution of Indian painting styles",
-              "What are the key characteristics of Madhubani painting?",
-              "Explain the significance of cave paintings at Ajanta and Ellora",
-              "How has contemporary Indian art evolved from traditional forms?",
-            ],
+  // Load subjects data from JSON or use embedded data
+  async loadSubjectsData() {
+    try {
+      const response = await fetch("data.json");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      if (!data.subjects) {
+        throw new Error("Invalid data structure: missing subjects property");
+      }
+
+      this.subjects = data.subjects;
+      console.log("Successfully loaded data from data.json");
+      return true;
+    } catch (error) {
+      console.error("Error loading data.json:", error);
+
+      // Fallback to embedded data
+      this.subjects = {
+        indianFreedomStruggle: {
+          name: "Indian Freedom Struggle",
+          icon: "🇮🇳",
+          color: "#ff6b6b",
+          topics: {
+            preIndependence: {
+              name: "Pre-Independence Era",
+              questions: [
+                "What were the main causes of the Indian Rebellion of 1857?",
+                "Describe the role of the Indian National Congress in the freedom struggle",
+                "Explain the significance of the Partition of Bengal in 1905",
+                "What was the impact of World War I on India's freedom movement?",
+              ],
+            },
           },
         },
-      },
-      currentAffairs: {
-        name: "Current Affairs",
-        icon: "📰",
-        color: "#54a0ff",
-        topics: {
-          internationalNews: {
-            name: "International News",
-            questions: [
-              "What are the current major global environmental concerns?",
-              "Describe recent developments in international space exploration",
-              "Explain the impact of recent trade agreements on global economy",
-              "What are the key issues being discussed in current UN meetings?",
-            ],
-          },
-          nationalNews: {
-            name: "National News",
-            questions: [
-              "What is the name of the AI app launched to preserve tribal languages? and which ministry launched it?",
-              "Which technology will be used in Census 2027 for geo-tagging all buildings?",
-              "What are the recent economic reforms introduced in India?",
-              "Describe the current government initiatives for digital India",
-              "Explain recent changes in education policy",
-              "What are the key infrastructure projects currently underway?",
-            ],
-          },
-          businessEconomy: {
-            name: "Business & Economy",
-            questions: [
-              "What is the current state of India's GDP growth?",
-              "Describe recent trends in the Indian stock market",
-              "Explain the impact of recent RBI policies on inflation",
-              "What are the current challenges facing India's manufacturing sector?",
-            ],
-          },
-        },
-      },
-      economics: {
-        name: "Economics",
-        icon: "💹",
-        color: "#1dd1a1",
-        topics: {
-          basicsOfEconomics: {
-            name: "Basics of Economics",
-            questions: [
-              "What is the difference between microeconomics and macroeconomics?",
-              "What do you understand by Primary, Secondary and Tertiary sectors of economy? Give examples.",
-              "What is law of Supply and Demand?",
-              "How Demand, Supply and Price are related to each other?",
-            ],
-          },
-          nationalIncome: {
-            name: "National Income",
-            questions: [
-              "What are factors of production?",
-              "What does the factors of production get in return?",
-              "What is the complete production process?",
-              "What are the factors of consumption?",
-            ],
-          },
-          money: {
-            name: "Money",
-            questions: [
-              "Describe the flow of money in an economy.",
-              "What is monetary policy?",
-              "What does it mean to have tight and loose monetary policy?",
-              "What are the effects of tight and loose monetary policy?",
-            ],
-          },
-          banking: {
-            name: "Banking",
-            questions: [
-              "What are the functions of commercial banks?",
-              "Describe the role of the Reserve Bank of India",
-              "Explain the concept of credit creation by banks",
-              "What are the different types of bank accounts?",
-            ],
-          },
-          microeconomics: {
-            name: "Microeconomics",
-            questions: [
-              "Explain the law of demand and its exceptions",
-              "What is price elasticity of demand and how is it measured?",
-              "Describe the different market structures in microeconomics",
-              "How do firms determine their optimal output level?",
-            ],
-          },
-          macroeconomics: {
-            name: "Macroeconomics",
-            questions: [
-              "What are the components of GDP and how are they calculated?",
-              "Explain the Phillips Curve and its implications",
-              "Describe the tools of monetary policy used by central banks",
-              "What is fiscal policy and how does it affect the economy?",
-            ],
-          },
-          indianEconomy: {
-            name: "Indian Economy",
-            questions: [
-              "Describe the structure of India's GDP by sector",
-              "What are the major challenges facing Indian agriculture?",
-              "Explain the impact of GST on the Indian economy",
-              "What are the key initiatives under 'Make in India'?",
-            ],
-          },
-        },
-      },
-      polity: {
-        name: "Polity",
-        icon: "🏛️",
-        color: "#f368e0",
-        topics: {
-          historicalBackground: {
-            name: "Historical Background",
-            questions: [
-              "what was the first step taken by the British to establish their control on East India Company? and when?",
-              "What were the two main provisions of the Regulating Act of 1773?",
-              "When was the Supreme Court of Calcutta established with how many judges?",
-              "What was the other name of Act of 1781?",
-            ],
-          },
-          makingOfConstitution: {
-            name: "Making of the Constitution of India",
-            questions: [
-              "Who gave the idea of a Constituent Assembly for India and when?",
-              "When was the demand for Constituent Assembly was raised by the Indian National Congress?",
-              "What was idea for formation of Constituent Assembly given by Nehru?",
-              "When was the Constituent Assembly for India demand was accepted by the British government and what was it named?",
-            ],
-          },
-          salientFeatures: {
-            name: "Salient Features of the Constitution",
-            questions: [
-              "How are three pillars of democracy are established through the constitution and how they are related to each other?",
-              "How British Parliamentary sytem is different from Indian Parliamentary system?",
-              "What is the other name of Parliamentary form of government?",
-              "How Indian judiciary is different from American judiciary?",
-            ],
-          },
-          preamble: {
-            name: "Preamble",
-            questions: [
-              "What does the Preamble of the Constitution reflect?",
-              "When was it amended and what was amended?",
-              "What is meaning of word 'Sovereign' in the Preamble?",
-              "What is meaning of word 'Socialist' in the Preamble? And when was it added?",
-            ],
-          },
-          unionAndItsTerritory: {
-            name: "Union and its Territory",
-            questions: [
-              "What does Article 1 of the Constitution state?",
-              "What are two reasons for which India is called a 'Union of States' not 'Federation of States'?",
-              "Under which article of the constitution the territory of India is defined? and what does it include?",
-              "What is given in the First Schedule of the Constitution?",
-            ],
-          },
-          citizenship: {
-            name: "Citizenship",
-            questions: [
-              "What are the different ways in which a person can acquire Indian citizenship?",
-              "What are the rights and duties of Indian citizens as per the Constitution?",
-              "How can Indian citizenship be terminated or revoked?",
-              "What is the significance of the Citizenship Amendment Act, 2019?",
-            ],
-          },
-          fundamentalRights: {
-            name: "Fundamental Rights",
-            questions: [
-              "What are the six fundamental rights guaranteed by the Indian Constitution?",
-              "Explain the significance of the Right to Equality (Articles 14-18)",
-              "Describe the Right to Freedom (Articles 19-22) and its limitations",
-              "What is the Right against Exploitation (Articles 23-24) and how does it protect citizens?",
-            ],
-          },
-          governance: {
-            name: "Governance",
-            questions: [
-              "What are the key features of the Panchayati Raj system?",
-              "Describe the role of the Central Vigilance Commission",
-              "Explain the significance of the Right to Information Act",
-              "What are the recent reforms in Indian governance?",
-            ],
-          },
-        },
-      },
-      accountingAuditing: {
-        name: "Accounting and Auditing",
-        icon: "📊",
-        color: "#ff9f43",
-        topics: {
-          financialAccounting: {
-            name: "Financial Accounting",
-            questions: [
-              "Explain the accounting equation and its components",
-              "What are the generally accepted accounting principles (GAAP)?",
-              "Describe the process of preparing financial statements",
-              "How are assets valued and depreciated in accounting?",
-            ],
-          },
-          auditingStandards: {
-            name: "Auditing Standards",
-            questions: [
-              "What are the generally accepted auditing standards (GAAS)?",
-              "Describe the different types of audit opinions",
-              "Explain the auditor's responsibility for detecting fraud",
-              "What is the process of internal control evaluation?",
-            ],
-          },
-          corporateAccounting: {
-            name: "Corporate Accounting",
-            questions: [
-              "How are corporate financial statements different from other entities?",
-              "Describe the process of merger and acquisition accounting",
-              "Explain the concept of goodwill and its accounting treatment",
-              "What are the accounting requirements for public companies?",
-            ],
-          },
-        },
-      },
-      computerApplications: {
-        name: "Computer Applications",
-        icon: "💻",
-        color: "#0abde3",
-        topics: {
-          basicsOfComputers: {
-            name: "Basics of Computers",
-            questions: [
-              "What is MAR?",
-              "What is MDR?",
-              "What is GPR",
-              "What is EPROM",
-              "What is EEEROM",
-              "What is SRAM",
-              "What is DRAM",
-            ],
-          },
-          softwareApplications: {
-            name: "Software Applications",
-            questions: [
-              "Describe the different types of application software",
-              "What are the key features of office productivity suites?",
-              "Explain the difference between proprietary and open source software",
-              "How do database management systems work?",
-            ],
-          },
-          webTechnologies: {
-            name: "Web Technologies",
-            questions: [
-              "What are the main components of web development?",
-              "Describe the difference between front-end and back-end development",
-              "Explain how responsive web design works",
-              "What are the current trends in web technologies?",
-            ],
-          },
-          mobileApplications: {
-            name: "Mobile Applications",
-            questions: [
-              "What are the different approaches to mobile app development?",
-              "Describe the app development lifecycle",
-              "Explain the difference between native and hybrid apps",
-              "What are the key considerations for mobile UI/UX design?",
-            ],
-          },
-        },
-      },
-      reasoning: {
-        name: "Reasoning",
-        icon: "🧠",
-        color: "#a55eea",
-        topics: {
-          logicalReasoning: {
-            name: "Logical Reasoning",
-            questions: [
-              "Explain the different types of logical fallacies",
-              "What are the components of a valid argument?",
-              "Describe the process of deductive reasoning",
-              "How is inductive reasoning different from deductive reasoning?",
-            ],
-          },
-          analyticalReasoning: {
-            name: "Analytical Reasoning",
-            questions: [
-              "How do you approach solving seating arrangement problems?",
-              "Describe strategies for solving blood relation problems",
-              "Explain how to solve coding-decoding questions",
-              "What are the techniques for solving direction sense problems?",
-            ],
-          },
-          verbalReasoning: {
-            name: "Verbal Reasoning",
-            questions: [
-              "What are the different types of verbal analogies?",
-              "Describe strategies for solving sentence completion questions",
-              "Explain how to approach critical reasoning questions",
-              "What are the common patterns in verbal classification?",
-            ],
-          },
-        },
-      },
-      mathematics: {
-        name: "Mathematics",
-        icon: "🧮",
-        color: "#10ac84",
-        topics: {
-          algebra: {
-            name: "Algebra",
-            questions: [
-              "Solve for x: 2x + 5 = 15",
-              "Factor the expression: x² - 4",
-              "Simplify: (3x²y)(4xy³)",
-              "Solve the system: 2x + y = 7, x - y = -1",
-            ],
-          },
-          geometry: {
-            name: "Geometry",
-            questions: [
-              "Calculate the area of a circle with radius 5",
-              "Find the volume of a cylinder with radius 3 and height 8",
-              "Prove the Pythagorean theorem",
-              "Calculate the angles of a triangle with sides 3, 4, 5",
-            ],
-          },
-          calculus: {
-            name: "Calculus",
-            questions: [
-              "Find the derivative of f(x) = 3x² + 2x - 5",
-              "Calculate the integral of ∫(2x + 3) dx",
-              "Find the limit as x approaches 0 of (sin x)/x",
-              "Solve the differential equation: dy/dx = 2y",
-            ],
-          },
-        },
-      },
-      labourLaws: {
-        name: "Labour Laws, Industrial Relations and Social Security",
-        icon: "⚖️",
-        color: "#ee5253",
-        topics: {
-          labourLegislation: {
-            name: "Labour Legislation",
-            questions: [
-              "What are the key provisions of the Industrial Disputes Act?",
-              "Describe the minimum wage laws in India",
-              "Explain the provisions of the Factories Act regarding working hours",
-              "What are the rights of workers under the Trade Unions Act?",
-            ],
-          },
-          industrialRelations: {
-            name: "Industrial Relations",
-            questions: [
-              "What are the causes of industrial disputes?",
-              "Describe the process of collective bargaining",
-              "Explain the role of conciliation in resolving industrial disputes",
-              "What are the different methods of worker participation in management?",
-            ],
-          },
-          socialSecurity: {
-            name: "Social Security",
-            questions: [
-              "Describe the social security schemes available for organized sector workers",
-              "What are the benefits provided under the Employees' Provident Fund scheme?",
-              "Explain the provisions of the Employees' State Insurance Act",
-              "What social security measures exist for unorganized sector workers?",
-            ],
-          },
-        },
-      },
-      science: {
-        name: "Science",
-        icon: "🔬",
-        color: "#66bb6a",
-        topics: {
-          physics: {
-            name: "Physics",
-            questions: [
-              "State Newton's three laws of motion",
-              "Calculate the force needed to accelerate a 5kg object at 3m/s²",
-              "Explain the difference between kinetic and potential energy",
-              "Describe the photoelectric effect",
-            ],
-          },
-          chemistry: {
-            name: "Chemistry",
-            questions: [
-              "Balance the equation: H₂ + O₂ → H₂O",
-              "Explain the difference between ionic and covalent bonds",
-              "Describe the process of electrolysis",
-              "What is the pH of a 0.01M HCl solution?",
-            ],
-          },
-          biology: {
-            name: "Biology",
-            questions: [
-              "Explain the process of photosynthesis",
-              "Describe the structure of DNA",
-              "What is the difference between mitosis and meiosis?",
-              "Explain how enzymes work as biological catalysts?",
-            ],
-          },
-        },
-      },
-    };
+      };
+      console.log("Using embedded data instead");
+      return false;
+    }
   }
 
   // Generate questions from subjects data
@@ -516,8 +88,8 @@ class QuestRecallApp {
             easeFactor: 2.5,
             repetitions: 0,
             interval: 1,
-            nextReview: new Date(),
-            rating: null, // null means never attempted, then 'again', 'hard', 'medium', 'easy'
+            nextReview: new Date(), // New questions are due immediately
+            rating: null, // null = never attempted
             important: false,
             lastReviewed: null,
             createdAt: new Date(),
@@ -527,28 +99,16 @@ class QuestRecallApp {
     });
   }
 
-  // Get question state with fallback for new questions
-  getQuestionState(questionId) {
-    const question = this.questions.find((q) => q.id === questionId);
-    return (
-      question || {
-        rating: null,
-        important: false,
-      }
-    );
-  }
-
-  // Calculate next review with fixed spaced repetition intervals
+  // FIXED: Proper Spaced Repetition System logic
   calculateNextReview(question, rating) {
     const now = new Date();
-    let { easeFactor, repetitions, interval } = question;
 
-    // Fixed intervals as requested
+    // SRS intervals as specified
     const intervals = {
-      again: 0, // Same day (instantly)
-      hard: 1, // Next day
-      medium: 2, // 2 days later
-      easy: 4, // 4 days later
+      again: 0.15, // 3-4 hours (0.15 days = 3.6 hours)
+      hard: 1, // 1 day
+      medium: 2, // 2 days
+      easy: 4, // 4 days
     };
 
     const daysToAdd = intervals[rating];
@@ -556,11 +116,21 @@ class QuestRecallApp {
       now.getTime() + daysToAdd * 24 * 60 * 60 * 1000
     );
 
-    // Update other SRS properties for compatibility
+    // Update SRS properties
+    let { easeFactor, repetitions } = question;
+
     if (rating === "easy" || rating === "medium") {
       repetitions++;
+      if (rating === "easy") {
+        easeFactor = Math.min(easeFactor + 0.1, 3.0);
+      }
     } else {
       repetitions = 0;
+      if (rating === "again") {
+        easeFactor = Math.max(easeFactor - 0.2, 1.3);
+      } else if (rating === "hard") {
+        easeFactor = Math.max(easeFactor - 0.15, 1.3);
+      }
     }
 
     return {
@@ -612,7 +182,7 @@ class QuestRecallApp {
     localStorage.setItem("questRecallQuestions", JSON.stringify(states));
   }
 
-  // Load stats from localStorage
+  // FIXED: Load stats with proper initialization and rating counts
   loadStats() {
     const saved = localStorage.getItem("questRecallStats");
     if (saved) {
@@ -620,15 +190,22 @@ class QuestRecallApp {
       if (stats.lastStudyDate) {
         stats.lastStudyDate = new Date(stats.lastStudyDate);
       }
+
+      // Initialize all required properties
+      if (!stats.dailyAttempts) stats.dailyAttempts = {};
+      if (!stats.ratingCounts)
+        stats.ratingCounts = { again: 0, hard: 0, medium: 0, easy: 0 };
+      if (typeof stats.streak === "undefined") stats.streak = 0;
+      if (typeof stats.totalAnswers === "undefined") stats.totalAnswers = 0;
+
       return stats;
     }
     return {
       streak: 0,
-      cardsCompletedToday: 0,
-      totalCardsCompleted: 0,
-      correctAnswers: 0,
       totalAnswers: 0,
       lastStudyDate: null,
+      dailyAttempts: {},
+      ratingCounts: { again: 0, hard: 0, medium: 0, easy: 0 },
     };
   }
 
@@ -637,14 +214,27 @@ class QuestRecallApp {
     localStorage.setItem("questRecallStats", JSON.stringify(this.stats));
   }
 
-  // Get due questions
+  // FIXED: Get questions due today (based on SRS nextReview date)
   getDueQuestions() {
     const now = new Date();
     return this.questions.filter((q) => {
       if (this.currentFilter && q.subjectKey !== this.currentFilter) {
         return false;
       }
-      return q.nextReview <= now;
+      // Include questions due today (including never attempted)
+      return q.nextReview <= now || q.rating === null;
+    });
+  }
+
+  // FIXED: Get ALL due questions (overdue + today + never attempted)
+  getAllDueQuestions() {
+    const now = new Date();
+    return this.questions.filter((q) => {
+      if (this.currentFilter && q.subjectKey !== this.currentFilter) {
+        return false;
+      }
+      // Include questions that are due (including never attempted and overdue)
+      return q.nextReview <= now || q.rating === null;
     });
   }
 
@@ -710,49 +300,67 @@ class QuestRecallApp {
     }
   }
 
-  // Update statistics
+  // COMPLETELY FIXED: Update statistics with correct calculations
   updateStats() {
     const now = new Date();
     const today = now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toDateString();
 
-    // Check if it's a new day
-    if (
-      !this.stats.lastStudyDate ||
-      this.stats.lastStudyDate.toDateString() !== today
-    ) {
-      if (this.stats.lastStudyDate) {
-        const daysDiff = Math.floor(
-          (now - this.stats.lastStudyDate) / (1000 * 60 * 60 * 24)
-        );
-        if (daysDiff === 1) {
-          this.stats.streak++;
-        } else if (daysDiff > 1) {
-          this.stats.streak = 0;
-        }
-      }
-      this.stats.cardsCompletedToday = 0;
-      this.stats.lastStudyDate = now;
+    // Ensure today's attempts are tracked
+    if (!this.stats.dailyAttempts[today]) {
+      this.stats.dailyAttempts[today] = 0;
     }
 
-    // Calculate due questions - questions that have never been attempted
-    const dueQuestionsCount = this.questions.filter((q) => {
-      return !q.rating; // No rating = never attempted
-    }).length;
-
-    // Update UI
+    // Calculate stats according to requirements
+    // Due Today: Questions that need to be attempted today (including never attempted)
     const cardsDueToday = this.getDueQuestions().length;
-    const retention =
+
+    // Due Overall: Total questions that are due (overdue + today + never attempted)
+    const dueQuestionsOverall = this.getAllDueQuestions().length;
+
+    // Progress: How many questions attempted MORE than yesterday
+    const todayAttempts = this.stats.dailyAttempts[today] || 0;
+    const yesterdayAttempts = this.stats.dailyAttempts[yesterdayStr] || 0;
+    const progressVsYesterday = todayAttempts - yesterdayAttempts;
+
+    // Retention: (medium + easy - hard - again) / total_attempted * 100
+    const { again, hard, medium, easy } = this.stats.ratingCounts;
+    const retentionRate =
       this.stats.totalAnswers > 0
         ? Math.round(
-            (this.stats.correctAnswers / this.stats.totalAnswers) * 100
+            ((medium + easy - hard - again) / this.stats.totalAnswers) * 100
           )
         : 0;
 
-    document.getElementById("cardsDue").textContent = cardsDueToday;
-    document.getElementById("streak").textContent = this.stats.streak;
-    document.getElementById("cardsCompleted").textContent =
-      this.stats.cardsCompletedToday;
-    document.getElementById("dueQuestions").textContent = dueQuestionsCount;
+    // Update UI elements
+    const cardsDueTodayEl = document.getElementById("cardsDueToday");
+    const dueOverallEl = document.getElementById("dueOverall");
+    const retentionEl = document.getElementById("retention");
+    const progressEl = document.getElementById("progress");
+
+    console.log("Stats Debug:", {
+      cardsDueToday,
+      dueQuestionsOverall,
+      retentionRate,
+      progressVsYesterday,
+      todayAttempts,
+      yesterdayAttempts,
+      ratingCounts: this.stats.ratingCounts,
+      totalAnswers: this.stats.totalAnswers,
+    });
+
+    // Update UI with proper values
+    if (cardsDueTodayEl) cardsDueTodayEl.textContent = cardsDueToday;
+    if (dueOverallEl) dueOverallEl.textContent = dueQuestionsOverall;
+    if (retentionEl) retentionEl.textContent = retentionRate + "%";
+    if (progressEl) {
+      progressEl.textContent =
+        progressVsYesterday >= 0
+          ? "+" + progressVsYesterday
+          : progressVsYesterday.toString();
+    }
 
     this.saveStats();
   }
@@ -766,11 +374,19 @@ class QuestRecallApp {
 
     // Update current subject display
     if (this.currentFilter) {
-      currentSubjectText.textContent = this.subjects[this.currentFilter].name;
-      clearFilter.classList.remove("hidden");
+      if (currentSubjectText) {
+        currentSubjectText.textContent = this.subjects[this.currentFilter].name;
+      }
+      if (clearFilter) {
+        clearFilter.classList.remove("hidden");
+      }
     } else {
-      currentSubjectText.textContent = "All Subjects";
-      clearFilter.classList.add("hidden");
+      if (currentSubjectText) {
+        currentSubjectText.textContent = "All Subjects";
+      }
+      if (clearFilter) {
+        clearFilter.classList.add("hidden");
+      }
     }
 
     const questionGroups = this.getQuestionsByRating();
@@ -780,13 +396,13 @@ class QuestRecallApp {
     );
 
     if (totalDue === 0) {
-      container.innerHTML = "";
-      noQuestions.classList.remove("hidden");
+      if (container) container.innerHTML = "";
+      if (noQuestions) noQuestions.classList.remove("hidden");
       return;
     }
 
-    noQuestions.classList.add("hidden");
-    container.innerHTML = "";
+    if (noQuestions) noQuestions.classList.add("hidden");
+    if (container) container.innerHTML = "";
 
     // Render questions by rating priority
     const ratingOrder = ["again", "hard", "medium", "easy"];
@@ -794,7 +410,7 @@ class QuestRecallApp {
       if (questionGroups[rating].length > 0) {
         questionGroups[rating].forEach((question) => {
           const card = this.createQuestionCard(question);
-          container.appendChild(card);
+          if (container) container.appendChild(card);
         });
       }
     });
@@ -808,17 +424,17 @@ class QuestRecallApp {
     const importantQuestions = this.getImportantQuestions();
 
     if (importantQuestions.length === 0) {
-      container.innerHTML = "";
-      noQuestions.classList.remove("hidden");
+      if (container) container.innerHTML = "";
+      if (noQuestions) noQuestions.classList.remove("hidden");
       return;
     }
 
-    noQuestions.classList.add("hidden");
-    container.innerHTML = "";
+    if (noQuestions) noQuestions.classList.add("hidden");
+    if (container) container.innerHTML = "";
 
     importantQuestions.forEach((question) => {
       const card = this.createQuestionCard(question);
-      container.appendChild(card);
+      if (container) container.appendChild(card);
     });
   }
 
@@ -834,14 +450,17 @@ class QuestRecallApp {
                 <span class="subject-badge">${question.subject}</span>
                 <button class="star-btn ${
                   question.important ? "important" : ""
-                }" data-question-id="${question.id}">⭐</button>
+                }"
+                        data-question-id="${question.id}">
+                    ${question.important ? "⭐" : "☆"}
+                </button>
             </div>
             <div class="question-text">${question.text}</div>
             <div class="rating-buttons">
                 <button class="rating-btn rating-again" data-rating="again" data-question-id="${
                   question.id
                 }">
-                    Again<br><span class="rating-time">Same day</span>
+                    Again<br><span class="rating-time">3-4 hours</span>
                 </button>
                 <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
                   question.id
@@ -874,45 +493,60 @@ class QuestRecallApp {
   // Show question in modal
   showQuestionModal(question) {
     this.currentQuestionId = question.id;
+
     const modal = document.getElementById("ratingModal");
     const modalSubject = document.getElementById("modalSubject");
     const modalQuestion = document.getElementById("modalQuestion");
     const modalStarBtn = document.getElementById("modalStarBtn");
 
-    modalSubject.textContent = question.subject;
-    modalQuestion.textContent = question.text;
-    modalStarBtn.className = `star-btn ${
-      question.important ? "important" : ""
-    }`;
-    modalStarBtn.dataset.questionId = question.id;
+    if (modalSubject) modalSubject.textContent = question.subject;
+    if (modalQuestion) modalQuestion.textContent = question.text;
+    if (modalStarBtn) {
+      modalStarBtn.className = `star-btn ${
+        question.important ? "important" : ""
+      }`;
+      modalStarBtn.dataset.questionId = question.id;
+    }
 
-    modal.classList.remove("hidden");
+    if (modal) modal.classList.remove("hidden");
   }
 
   // Hide question modal
   hideQuestionModal() {
     const modal = document.getElementById("ratingModal");
-    modal.classList.add("hidden");
+    if (modal) modal.classList.add("hidden");
     this.currentQuestionId = null;
   }
 
-  // Rate question
+  // FIXED: Rate question with proper stats tracking
   rateQuestion(questionId, rating) {
-    const question = this.questions.find((q) => q.id == questionId);
+    const question = this.questions.find((q) => q.id === questionId);
     if (!question) return;
 
-    // Calculate next review using fixed intervals
+    console.log(`Rating question ${questionId} as ${rating}`);
+
+    // Calculate next review using SRS
     const srsData = this.calculateNextReview(question, rating);
     Object.assign(question, srsData);
 
-    // Update statistics
-    this.stats.cardsCompletedToday++;
-    this.stats.totalCardsCompleted++;
+    // FIXED: Update statistics properly
+    const today = new Date().toDateString();
+
+    // Update daily attempts
+    if (!this.stats.dailyAttempts[today]) {
+      this.stats.dailyAttempts[today] = 0;
+    }
+    this.stats.dailyAttempts[today]++;
+
+    // FIXED: Track rating counts for retention calculation
+    this.stats.ratingCounts[rating]++;
     this.stats.totalAnswers++;
 
-    if (rating === "medium" || rating === "easy") {
-      this.stats.correctAnswers++;
-    }
+    console.log("Updated stats:", {
+      dailyAttempts: this.stats.dailyAttempts[today],
+      totalAnswers: this.stats.totalAnswers,
+      ratingCounts: this.stats.ratingCounts,
+    });
 
     // Animate card out
     const card = document.querySelector(`[data-question-id="${questionId}"]`);
@@ -940,28 +574,27 @@ class QuestRecallApp {
 
     // Save data
     this.saveQuestionStates();
+    this.saveStats();
   }
 
   // Toggle important status
   toggleImportant(questionId) {
-    const question = this.questions.find((q) => q.id == questionId);
+    const question = this.questions.find((q) => q.id === questionId);
     if (question) {
       question.important = !question.important;
       this.saveQuestionStates();
 
-      // Update star button immediately with visual feedback
+      // Update star button immediately
       const starBtns = document.querySelectorAll(
         `[data-question-id="${questionId}"].star-btn`
       );
       starBtns.forEach((btn) => {
         if (question.important) {
           btn.classList.add("important");
-          btn.style.filter = "grayscale(0%)";
-          btn.style.transform = "scale(1.1)";
+          btn.textContent = "⭐";
         } else {
           btn.classList.remove("important");
-          btn.style.filter = "grayscale(100%)";
-          btn.style.transform = "scale(1)";
+          btn.textContent = "☆";
         }
       });
 
@@ -975,6 +608,8 @@ class QuestRecallApp {
   // Render subjects page
   renderSubjects() {
     const container = document.getElementById("subjectsGrid");
+    if (!container) return;
+
     container.innerHTML = "";
 
     Object.entries(this.subjects).forEach(([key, subject]) => {
@@ -992,13 +627,10 @@ class QuestRecallApp {
       card.innerHTML = `
                 <div class="subject-icon">${subject.icon}</div>
                 <div class="subject-name">${subject.name}</div>
-                <div class="subject-count">${dueCount} due • ${subjectQuestions.length} total</div>
+                <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
             `;
 
-      card.addEventListener("click", () => {
-        this.setSubjectFilter(key);
-      });
-
+      card.addEventListener("click", () => this.setSubjectFilter(key));
       container.appendChild(card);
     });
 
@@ -1012,9 +644,7 @@ class QuestRecallApp {
               this.getDueQuestions().length
             } due</div>
         `;
-    allCard.addEventListener("click", () => {
-      this.clearSubjectFilter();
-    });
+    allCard.addEventListener("click", () => this.clearSubjectFilter());
     container.insertBefore(allCard, container.firstChild);
   }
 
@@ -1036,34 +666,49 @@ class QuestRecallApp {
   // Show home page
   showHomePage() {
     this.showingImportant = false;
-    document.getElementById("homePage").classList.add("active");
-    document.getElementById("subjectPage").classList.remove("active");
-    document.getElementById("importantPage").classList.remove("active");
+    const homePage = document.getElementById("homePage");
+    const subjectPage = document.getElementById("subjectPage");
+    const importantPage = document.getElementById("importantPage");
+
+    if (homePage) homePage.classList.add("active");
+    if (subjectPage) subjectPage.classList.remove("active");
+    if (importantPage) importantPage.classList.remove("active");
   }
 
   // Show subjects page
   showSubjectsPage() {
     this.showingImportant = false;
     this.renderSubjects();
-    document.getElementById("homePage").classList.remove("active");
-    document.getElementById("subjectPage").classList.add("active");
-    document.getElementById("importantPage").classList.remove("active");
+    const homePage = document.getElementById("homePage");
+    const subjectPage = document.getElementById("subjectPage");
+    const importantPage = document.getElementById("importantPage");
+
+    if (homePage) homePage.classList.remove("active");
+    if (subjectPage) subjectPage.classList.add("active");
+    if (importantPage) importantPage.classList.remove("active");
   }
 
   // Show important questions page
   showImportantPage() {
     this.showingImportant = true;
     this.renderImportantQuestions();
-    document.getElementById("homePage").classList.remove("active");
-    document.getElementById("subjectPage").classList.remove("active");
-    document.getElementById("importantPage").classList.add("active");
+    const homePage = document.getElementById("homePage");
+    const subjectPage = document.getElementById("subjectPage");
+    const importantPage = document.getElementById("importantPage");
+
+    if (homePage) homePage.classList.remove("active");
+    if (subjectPage) subjectPage.classList.remove("active");
+    if (importantPage) importantPage.classList.add("active");
   }
 
   // Toggle randomization
   toggleRandomization() {
     this.isRandomized = !this.isRandomized;
     const btn = document.getElementById("randomizeBtn");
-    btn.textContent = this.isRandomized ? "🎲 Ordered" : "🎲 Randomize";
+    if (btn) {
+      btn.textContent = this.isRandomized ? "🎯 Ordered" : "🎲 Randomize";
+    }
+
     if (this.showingImportant) {
       this.renderImportantQuestions();
     } else {
@@ -1071,20 +716,18 @@ class QuestRecallApp {
     }
   }
 
-  // Practice more functionality - shows only Again and Hard questions
+  // Practice more functionality
   practiceMore() {
     const now = new Date();
     const practiceQuestions = this.getPracticeQuestions();
 
     if (practiceQuestions.length === 0) {
-      alert('No questions rated as "Again" or "Hard" available for practice!');
+      alert("No questions rated as 'Again' or 'Hard' available for practice!");
       return;
     }
 
     // Make practice questions due immediately
-    practiceQuestions.forEach((q) => {
-      q.nextReview = now;
-    });
+    practiceQuestions.forEach((q) => (q.nextReview = now));
 
     this.renderHome();
     this.updateStats();
@@ -1094,57 +737,68 @@ class QuestRecallApp {
   // Bind event handlers
   bindEvents() {
     // Header buttons
-    document.getElementById("subjectBtn").addEventListener("click", () => {
-      this.showSubjectsPage();
-    });
-
-    document.getElementById("randomizeBtn").addEventListener("click", () => {
-      this.toggleRandomization();
-    });
-
-    document.getElementById("importantBtn").addEventListener("click", () => {
-      this.showImportantPage();
-    });
-
-    // Subject page back button
-    document.getElementById("backToHome").addEventListener("click", () => {
-      this.showHomePage();
-    });
-
-    // Important page back button
-    document
-      .getElementById("backToHomeFromImportant")
-      .addEventListener("click", () => {
-        this.showHomePage();
+    const subjectBtn = document.getElementById("subjectBtn");
+    const randomizeBtn = document.getElementById("randomizeBtn");
+    const importantBtn = document.getElementById("importantBtn");
+    const logo = document.getElementById("appLogo");
+    if (logo) {
+      logo.addEventListener("click", () => {
+        this.showingImportant = false;
+        this.renderHome();
+        this.updateStats();
       });
+    }
+
+    if (subjectBtn)
+      subjectBtn.addEventListener("click", () => this.showSubjectsPage());
+    if (randomizeBtn)
+      randomizeBtn.addEventListener("click", () => this.toggleRandomization());
+    if (importantBtn)
+      importantBtn.addEventListener("click", () => this.showImportantPage());
+
+    // Back buttons
+    const backToHome = document.getElementById("backToHome");
+    const backToHomeFromImportant = document.getElementById(
+      "backToHomeFromImportant"
+    );
+
+    if (backToHome)
+      backToHome.addEventListener("click", () => this.showHomePage());
+    if (backToHomeFromImportant)
+      backToHomeFromImportant.addEventListener("click", () =>
+        this.showHomePage()
+      );
 
     // Clear filter button
-    document.getElementById("clearFilter").addEventListener("click", () => {
-      this.clearSubjectFilter();
-    });
+    const clearFilter = document.getElementById("clearFilter");
+    if (clearFilter)
+      clearFilter.addEventListener("click", () => this.clearSubjectFilter());
 
-    // Rating buttons (event delegation)
+    // Rating buttons event delegation
     document.addEventListener("click", (e) => {
       if (e.target.classList.contains("rating-btn")) {
         e.stopPropagation();
         const rating = e.target.dataset.rating;
         const questionId = e.target.dataset.questionId;
-        this.rateQuestion(questionId, rating);
+        this.rateQuestion(parseInt(questionId), rating);
       }
 
       if (e.target.classList.contains("star-btn")) {
         e.stopPropagation();
         const questionId = e.target.dataset.questionId;
-        this.toggleImportant(questionId);
+        this.toggleImportant(parseInt(questionId));
       }
     });
 
     // Modal events
-    document.getElementById("ratingModal").addEventListener("click", (e) => {
-      if (e.target.classList.contains("modal-overlay")) {
-        this.hideQuestionModal();
-      }
-    });
+    const ratingModal = document.getElementById("ratingModal");
+    if (ratingModal) {
+      ratingModal.addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+          this.hideQuestionModal();
+        }
+      });
+    }
 
     // Modal rating buttons
     document.querySelectorAll("#ratingModal .rating-btn").forEach((btn) => {
@@ -1158,16 +812,19 @@ class QuestRecallApp {
     });
 
     // Modal star button
-    document.getElementById("modalStarBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      const questionId = e.target.dataset.questionId;
-      this.toggleImportant(questionId);
-    });
+    const modalStarBtn = document.getElementById("modalStarBtn");
+    if (modalStarBtn) {
+      modalStarBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const questionId = e.target.dataset.questionId;
+        this.toggleImportant(parseInt(questionId));
+      });
+    }
 
-    // Add more button - Practice More with fixed logic
-    document.getElementById("addMoreBtn").addEventListener("click", () => {
-      this.practiceMore();
-    });
+    // Practice more button
+    const addMoreBtn = document.getElementById("addMoreBtn");
+    if (addMoreBtn)
+      addMoreBtn.addEventListener("click", () => this.practiceMore());
 
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
