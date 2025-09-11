@@ -359,7 +359,7 @@ class QuestRecallApp {
     if (!this.stats.dailyAttempts[today]) {
       this.stats.dailyAttempts[today] = 0;
     }
-    
+
     const cardsDueToday = this.getDueQuestions().length;
 
     // Due Overall: Total questions that are due (overdue + today + never attempted)
@@ -521,22 +521,22 @@ class QuestRecallApp {
                 <button class="rating-btn rating-again" data-rating="again" data-question-id="${
                   question.id
                 }">
-                    Again<br><span class="rating-time">3-4 hours</span>
+                    Again<br><span class="rating-time">Tomorrow</span>
                 </button>
                 <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
                   question.id
                 }">
-                    Hard<br><span class="rating-time">1 day</span>
+                    Hard<br><span class="rating-time">3 days</span>
                 </button>
                 <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
                   question.id
                 }">
-                    Medium<br><span class="rating-time">2 days</span>
+                    Medium<br><span class="rating-time">7 days</span>
                 </button>
                 <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
                   question.id
                 }">
-                    Easy<br><span class="rating-time">4 days</span>
+                    Easy<br><span class="rating-time">14 days</span>
                 </button>
             </div>
         `;

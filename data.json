@@ -4,17 +4,13 @@
       "name": "Indian Freedom Struggle",
       "icon": "🇮🇳",
       "color": "#ff6b6b",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "artCulture": {
       "name": "Art and Culture",
       "icon": "🎨",
       "color": "#ff9ff3",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "currentAffairs": {
       "name": "Current Affairs",
@@ -178,19 +174,48 @@
             "How will RBI use OMOs to combat inflation and economic slowdown?",
             "What is G-SAP? What is its impact on liquidity and money supply?",
             "When G-SAP is conducted? by whom?",
+            "What is helicopter money?",
             "What is OP-Twist?",
             "Under OP-Twist, which securities are sold and which are bought?",
             "What is the purpose of OP-Twist?",
-            "Why does RBI under OP-Twist sell short term securities?", 
-            "What is MPC? What is its purpose?",
-            "What is helicopter money?"
+            "What happens to the liquidity and MS in each case of OP-Twist",
+            "Why does RBI under OP-Twist sell short term securities instead of long term securities?",
+            "What is MPC?",
+            "What are two purpose of MPC?",
+            "Who sets the inflation targets?",
+            "What is the normal range of inflation?",
+            "Why is it recommended that inflation should remain between 2 to 6 percent?",
+            "What happens if the Inflation target is breached by MPC?",
+            "How many members are there in MPC and who are they?",
+            "Is the target set by government for MPC rigid?",
+            "Explain the mechanism of voting in MPC.",
+            "What is term of setting the inflation target?",
+            "What is the term of MPC formation",
+            "MPC is powered by which act? And on which committee recommendations?",
+            "What do you understand by legal tender in money?",
+            "What is fiat money? How is it different from legal tender?",
+            "What is commodity money? Give examples.",
+            "What is Fiduciary money? Give examples.",
+            "What is Plastic money? Give examples.",
+            "Fiat money we use in daily life is guaranteed by whom?",
+            "Who is the issuing authority of these currency. a)₹1 Note b)₹100-₹500 Note c)Coins",
+            "What is Bank and how is it different from RR CRR?",
+            "Arrange these in Decreasing Order. a)RR b)RRR c)MSF Rate d)Bank Rate",
+            "What are qualitative tools of Monetary Policy? What are its types.",
+            "What is PSL and what is its purpose.",
+            "What is Moral Suasion and its purpose?",
+            "What is margin requirement?",
+            "How margin requirement effect MS?",
+            "What is credit rationing?",
+            "RBI do not have involvement in which of these schemes a)Credit Rationing b)CRR c)MSF e)MR",
+            "What is minimum reserve session is equivalent to?"
           ]
         },
         "banking": {
           "name": "Banking",
           "questions": [
-            
-
+            "What are BFI, NBFC, AFI?",
+            "What are the types of BFI?"
           ]
         }
       }
@@ -362,21 +387,15 @@
         },
         "citizenship": {
           "name": "Citizenship",
-          "questions": [
-            
-          ]
+          "questions": []
         },
         "fundamentalRights": {
           "name": "Fundamental Rights",
-          "questions": [
-            
-          ]
+          "questions": []
         },
         "governance": {
           "name": "Governance",
-          "questions": [
-            
-          ]
+          "questions": []
         }
       }
     },
@@ -384,9 +403,7 @@
       "name": "Accounting and Auditing",
       "icon": "📊",
       "color": "#ff9f43",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "computerApplications": {
       "name": "Computer Applications",
@@ -411,33 +428,25 @@
       "name": "Reasoning",
       "icon": "🧠",
       "color": "#a55eea",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "mathematics": {
       "name": "Mathematics",
       "icon": "🧮",
       "color": "#10ac84",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "labourLaws": {
       "name": "Labour Laws, Industrial Relations and Social Security",
       "icon": "⚖️",
       "color": "#ee5253",
-      "topics": {
-        
-      }
+      "topics": {}
     },
     "science": {
       "name": "Science",
       "icon": "🔬",
       "color": "#66bb6a",
-      "topics": {
-        
-      }
+      "topics": {}
     }
   }
 }
