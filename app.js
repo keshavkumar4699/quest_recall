@@ -3,7 +3,7 @@ class QuestRecallApp {
   constructor() {
     this.questions = [];
     this.subjects = {};
-    this.currentFilter = null;
+    this.currentFilter = { subjectKey: null, topicKey: null };
     this.isRandomized = false;
     this.stats = this.loadStats();
     this.currentQuestionId = null;
@@ -226,14 +226,43 @@ class QuestRecallApp {
     });
   }
 
+  getDueQuestions() {
+    const now = new Date();
+    return this.questions.filter((q) => {
+      if (this.currentFilter) {
+        if (
+          this.currentFilter.subjectKey &&
+          q.subjectKey !== this.currentFilter.subjectKey
+        ) {
+          return false;
+        }
+        if (
+          this.currentFilter.topicKey &&
+          q.topicKey !== this.currentFilter.topicKey
+        ) {
+          return false;
+        }
+      }
+      return q.nextReview <= now || q.rating === null;
+    });
+  }
+
   // FIXED: Get ALL due questions (overdue + today + never attempted)
   getAllDueQuestions() {
     const now = new Date();
     return this.questions.filter((q) => {
-      if (this.currentFilter && q.subjectKey !== this.currentFilter) {
+      if (
+        this.currentFilter.subjectKey &&
+        q.subjectKey !== this.currentFilter.subjectKey
+      ) {
         return false;
       }
-      // Include questions that are due (including never attempted and overdue)
+      if (
+        this.currentFilter.topicKey &&
+        q.topicKey !== this.currentFilter.topicKey
+      ) {
+        return false;
+      }
       return q.nextReview <= now || q.rating === null;
     });
   }
@@ -241,7 +270,16 @@ class QuestRecallApp {
   // Get important questions
   getImportantQuestions() {
     return this.questions.filter((q) => {
-      if (this.currentFilter && q.subjectKey !== this.currentFilter) {
+      if (
+        this.currentFilter.subjectKey &&
+        q.subjectKey !== this.currentFilter.subjectKey
+      ) {
+        return false;
+      }
+      if (
+        this.currentFilter.topicKey &&
+        q.topicKey !== this.currentFilter.topicKey
+      ) {
         return false;
       }
       return q.important;
@@ -251,7 +289,16 @@ class QuestRecallApp {
   // Get practice questions (only Again and Hard)
   getPracticeQuestions() {
     return this.questions.filter((q) => {
-      if (this.currentFilter && q.subjectKey !== this.currentFilter) {
+      if (
+        this.currentFilter.subjectKey &&
+        q.subjectKey !== this.currentFilter.subjectKey
+      ) {
+        return false;
+      }
+      if (
+        this.currentFilter.topicKey &&
+        q.topicKey !== this.currentFilter.topicKey
+      ) {
         return false;
       }
       return q.rating === "again" || q.rating === "hard";
@@ -373,10 +420,19 @@ class QuestRecallApp {
     const clearFilter = document.getElementById("clearFilter");
 
     // Update current subject display
-    if (this.currentFilter) {
-      if (currentSubjectText) {
-        currentSubjectText.textContent = this.subjects[this.currentFilter].name;
+    if (this.currentFilter && this.currentFilter.subjectKey) {
+      const subject = this.subjects[this.currentFilter.subjectKey];
+      let displayText = subject.name;
+
+      if (this.currentFilter.topicKey) {
+        const topic = subject.topics[this.currentFilter.topicKey];
+        displayText += `: ${topic.name}`;
       }
+
+      if (currentSubjectText) {
+        currentSubjectText.textContent = displayText;
+      }
+
       if (clearFilter) {
         clearFilter.classList.remove("hidden");
       }
@@ -663,6 +719,102 @@ class QuestRecallApp {
     this.updateStats();
   }
 
+  // Add this method to render topics for a selected subject
+  renderTopics(subjectKey) {
+    const container = document.getElementById("topicsGrid");
+    const subject = this.subjects[subjectKey];
+
+    if (!container || !subject) return;
+
+    container.innerHTML = "";
+
+    // Add "All Topics" option
+    const allTopicsCard = document.createElement("div");
+    allTopicsCard.className = "subject-card";
+    allTopicsCard.innerHTML = `
+    <div class="subject-icon">📚</div>
+    <div class="subject-name">All Topics</div>
+    <div class="subject-count">${
+      this.getDueQuestionsForSubject(subjectKey).length
+    } due</div>
+  `;
+    allTopicsCard.addEventListener("click", () => {
+      this.currentFilter = { subjectKey, topicKey: null };
+      this.showHomePage();
+      this.renderHome();
+      this.updateStats();
+    });
+    container.appendChild(allTopicsCard);
+
+    // Add individual topic cards
+    Object.entries(subject.topics).forEach(([topicKey, topic]) => {
+      const topicQuestions = this.questions.filter(
+        (q) => q.subjectKey === subjectKey && q.topicKey === topicKey
+      );
+      const dueCount = topicQuestions.filter(
+        (q) => q.nextReview <= new Date() || q.rating === null
+      ).length;
+
+      const card = document.createElement("div");
+      card.className = "subject-card";
+      card.dataset.topicKey = topicKey;
+
+      card.innerHTML = `
+      <div class="subject-icon">${subject.icon}</div>
+      <div class="subject-name">${topic.name}</div>
+      <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
+    `;
+
+      card.addEventListener("click", () => {
+        this.currentFilter = { subjectKey, topicKey };
+        this.showHomePage();
+        this.renderHome();
+        this.updateStats();
+      });
+      container.appendChild(card);
+    });
+  }
+
+  // Add helper method to get due questions for a subject
+  getDueQuestionsForSubject(subjectKey) {
+    const now = new Date();
+    return this.questions.filter((q) => {
+      if (q.subjectKey !== subjectKey) return false;
+      return q.nextReview <= now || q.rating === null;
+    });
+  }
+
+  // Update the setSubjectFilter method to show topics instead of filtering directly
+  setSubjectFilter(subjectKey) {
+    this.showTopicsPage(subjectKey);
+  }
+
+  // Add method to show topics page
+  showTopicsPage(subjectKey) {
+    this.showingImportant = false;
+    const subject = this.subjects[subjectKey];
+
+    if (!subject) return;
+
+    // Update current subject name in the UI
+    const currentSubjectName = document.getElementById("currentSubjectName");
+    if (currentSubjectName) {
+      currentSubjectName.textContent = subject.name;
+    }
+
+    this.renderTopics(subjectKey);
+
+    const homePage = document.getElementById("homePage");
+    const subjectPage = document.getElementById("subjectPage");
+    const topicPage = document.getElementById("topicPage");
+    const importantPage = document.getElementById("importantPage");
+
+    if (homePage) homePage.classList.remove("active");
+    if (subjectPage) subjectPage.classList.remove("active");
+    if (topicPage) topicPage.classList.add("active");
+    if (importantPage) importantPage.classList.remove("active");
+  }
+
   // Show home page
   showHomePage() {
     this.showingImportant = false;
@@ -740,6 +892,10 @@ class QuestRecallApp {
     const subjectBtn = document.getElementById("subjectBtn");
     const randomizeBtn = document.getElementById("randomizeBtn");
     const importantBtn = document.getElementById("importantBtn");
+    const backToSubjects = document.getElementById("backToSubjects");
+    if (backToSubjects) {
+      backToSubjects.addEventListener("click", () => this.showSubjectsPage());
+    }
     const logo = document.getElementById("appLogo");
     if (logo) {
       logo.addEventListener("click", () => {

@@ -11,7 +11,7 @@
       <!-- Header -->
       <header class="header">
         <div class="header-content">
-          <h1 class="logo" id="appLogo" style="cursor:pointer">QuestRecall</h1>
+          <h1 class="logo" id="appLogo" style="cursor: pointer">QuestRecall</h1>
           <div class="header-actions">
             <button id="randomizeBtn" class="btn btn--outline btn--sm">
               🎲 Randomize
@@ -84,6 +84,20 @@
 
           <div class="subjects-grid" id="subjectsGrid">
             <!-- Subject cards will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Topic Selection Page -->
+        <div id="topicPage" class="page">
+          <div class="page-header">
+            <button id="backToSubjects" class="btn btn--outline">
+              ← Back to Subjects
+            </button>
+            <h2>Select Topic for <span id="currentSubjectName"></span></h2>
+          </div>
+
+          <div class="subjects-grid" id="topicsGrid">
+            <!-- Topic cards will be inserted here -->
           </div>
         </div>
 
