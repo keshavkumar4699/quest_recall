@@ -419,6 +419,13 @@ class QuestRecallApp {
     const currentSubjectText = document.getElementById("currentSubjectText");
     const clearFilter = document.getElementById("clearFilter");
 
+    const backToTopics = document.getElementById("backToTopics");
+    if (this.currentFilter.topicKey) {
+      backToTopics.classList.remove("hidden");
+    } else {
+      backToTopics.classList.add("hidden");
+    }
+
     // Update current subject display
     if (this.currentFilter && this.currentFilter.subjectKey) {
       const subject = this.subjects[this.currentFilter.subjectKey];
@@ -893,6 +900,20 @@ class QuestRecallApp {
     const randomizeBtn = document.getElementById("randomizeBtn");
     const importantBtn = document.getElementById("importantBtn");
     const backToSubjects = document.getElementById("backToSubjects");
+    const backToTopics = document.getElementById("backToTopics");
+    if (backToTopics) {
+      backToTopics.addEventListener("click", () => {
+        // Hide Home, show Topic list
+        document.getElementById("homePage").classList.remove("active");
+        document.getElementById("topicPage").classList.add("active");
+        // Clear only the topic filter
+        this.currentFilter.topicKey = null;
+        // Re-render topics for the same subject
+        this.renderTopics(this.currentFilter.subjectKey);
+        this.updateStats();
+      });
+    }
+
     if (backToSubjects) {
       backToSubjects.addEventListener("click", () => this.showSubjectsPage());
     }
