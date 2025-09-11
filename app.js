@@ -105,10 +105,10 @@ class QuestRecallApp {
 
     // SRS intervals as specified
     const intervals = {
-      again: 0.15, // 3-4 hours (0.15 days = 3.6 hours)
-      hard: 1, // 1 day
-      medium: 2, // 2 days
-      easy: 4, // 4 days
+      again: 1, // 1 day
+      hard: 3, // 3 day
+      medium: 7, // 7 days
+      easy: 14, // 14 days
     };
 
     const daysToAdd = intervals[rating];
@@ -301,7 +301,7 @@ class QuestRecallApp {
       ) {
         return false;
       }
-      return q.rating === "again" || q.rating === "hard";
+      return q.rating === "again";
     });
   }
 
@@ -359,9 +359,7 @@ class QuestRecallApp {
     if (!this.stats.dailyAttempts[today]) {
       this.stats.dailyAttempts[today] = 0;
     }
-
-    // Calculate stats according to requirements
-    // Due Today: Questions that need to be attempted today (including never attempted)
+    
     const cardsDueToday = this.getDueQuestions().length;
 
     // Due Overall: Total questions that are due (overdue + today + never attempted)
