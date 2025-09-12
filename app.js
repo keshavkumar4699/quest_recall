@@ -5,6 +5,7 @@ class QuestRecallApp {
     this.subjects = {};
     this.currentFilter = { subjectKey: null, topicKey: null };
     this.isRandomized = false;
+    this.randomizedOrder = []; // Store the randomized order of question IDs
     this.stats = this.loadStats();
     this.currentQuestionId = null;
     this.showingImportant = false;
@@ -294,9 +295,36 @@ class QuestRecallApp {
     });
   }
 
+  // NEW: Get questions in the current randomized order if enabled
+  getQuestionsInCurrentOrder() {
+    const dueQuestions = this.getDueQuestions();
+
+    // If not randomized, return questions in their natural order
+    if (!this.isRandomized) {
+      return dueQuestions;
+    }
+
+    // If we have a randomized order, use it
+    if (this.randomizedOrder.length > 0) {
+      // Filter and sort based on the randomized order
+      return this.randomizedOrder
+        .map((id) => dueQuestions.find((q) => q.id === id))
+        .filter((q) => q !== undefined);
+    }
+
+    // Otherwise, create a new randomized order
+    const questionIds = dueQuestions.map((q) => q.id);
+    this.shuffleArray(questionIds);
+    this.randomizedOrder = questionIds;
+
+    return dueQuestions.sort((a, b) => {
+      return questionIds.indexOf(a.id) - questionIds.indexOf(b.id);
+    });
+  }
+
   // Get questions grouped by rating
   getQuestionsByRating() {
-    const dueQuestions = this.getDueQuestions();
+    const dueQuestions = this.getQuestionsInCurrentOrder();
     const groups = {
       again: [],
       hard: [],
@@ -318,11 +346,6 @@ class QuestRecallApp {
         if (!a.important && b.important) return 1;
         return 0;
       });
-
-      // Randomize if enabled
-      if (this.isRandomized) {
-        this.shuffleArray(groups[rating]);
-      }
     });
 
     return groups;
@@ -483,38 +506,38 @@ class QuestRecallApp {
     card.dataset.questionId = question.id;
 
     card.innerHTML = `
-            <div class="question-header">
-              <span class="subject-badge">${question.subject}</span>
-              <button class="star-btn ${
-                question.important ? "important" : ""
-              }" data-question-id="${question.id}">
-                ${question.important ? "🌟" : "⭐"}
-              </button>
-            </div>
-            <div class="question-text">${question.text}</div>
-            <div class="rating-buttons">
-              <button class="rating-btn rating-again" data-rating="again" data-question-id="${
-                question.id
-              }">
-                Again<br><span class="rating-time">Tomorrow</span>
-              </button>
-              <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
-                question.id
-              }">
-                Hard<br><span class="rating-time">3 days</span>
-              </button>
-              <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
-                question.id
-              }">
-                Medium<br><span class="rating-time">7 days</span>
-              </button>
-              <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
-                question.id
-              }">
-                Easy<br><span class="rating-time">14 days</span>
-              </button>
-            </div>
-          `;
+                    <div class="question-header">
+                        <span class="subject-badge">${question.subject}</span>
+                        <button class="star-btn ${
+                          question.important ? "important" : ""
+                        }" data-question-id="${question.id}">
+                            ${question.important ? "🌟" : "⭐"}
+                        </button>
+                    </div>
+                    <div class="question-text">${question.text}</div>
+                    <div class="rating-buttons">
+                        <button class="rating-btn rating-again" data-rating="again" data-question-id="${
+                          question.id
+                        }">
+                            Again<br><span class="rating-time">Tomorrow</span>
+                        </button>
+                        <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
+                          question.id
+                        }">
+                            Hard<br><span class="rating-time">3 days</span>
+                        </button>
+                        <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
+                          question.id
+                        }">
+                            Medium<br><span class="rating-time">7 days</span>
+                        </button>
+                        <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
+                          question.id
+                        }">
+                            Easy<br><span class="rating-time">14 days</span>
+                        </button>
+                    </div>
+                `;
     return card;
   }
 
@@ -645,10 +668,10 @@ class QuestRecallApp {
       card.dataset.subjectKey = key;
 
       card.innerHTML = `
-                      <div class="subject-icon">${subject.icon}</div>
-                      <div class="subject-name">${subject.name}</div>
-                      <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
-                  `;
+                        <div class="subject-icon">${subject.icon}</div>
+                        <div class="subject-name">${subject.name}</div>
+                        <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
+                    `;
 
       card.addEventListener("click", () => this.showTopicsPage(key));
       container.appendChild(card);
@@ -658,12 +681,12 @@ class QuestRecallApp {
     const allCard = document.createElement("div");
     allCard.className = "subject-card";
     allCard.innerHTML = `
-                  <div class="subject-icon">📚</div>
-                  <div class="subject-name">All Subjects</div>
-                  <div class="subject-count">${
-                    this.getDueQuestions().length
-                  } due</div>
-              `;
+                    <div class="subject-icon">📚</div>
+                    <div class="subject-name">All Subjects</div>
+                    <div class="subject-count">${
+                      this.getDueQuestions().length
+                    } due</div>
+                `;
     allCard.addEventListener("click", () => this.clearSubjectFilter());
     container.insertBefore(allCard, container.firstChild);
   }
@@ -671,6 +694,7 @@ class QuestRecallApp {
   // Clear subject filter
   clearSubjectFilter() {
     this.currentFilter = { subjectKey: null, topicKey: null };
+    this.resetRandomization();
     this.showHomePage();
     this.renderHome();
     this.updateStats();
@@ -689,14 +713,15 @@ class QuestRecallApp {
     const allTopicsCard = document.createElement("div");
     allTopicsCard.className = "subject-card";
     allTopicsCard.innerHTML = `
-          <div class="subject-icon">📚</div>
-          <div class="subject-name">All Topics</div>
-          <div class="subject-count">${
-            this.getDueQuestionsForSubject(subjectKey).length
-          } due</div>
-        `;
+                    <div class="subject-icon">📚</div>
+                    <div class="subject-name">All Topics</div>
+                    <div class="subject-count">${
+                      this.getDueQuestionsForSubject(subjectKey).length
+                    } due</div>
+                `;
     allTopicsCard.addEventListener("click", () => {
       this.currentFilter = { subjectKey, topicKey: null };
+      this.resetRandomization();
       this.showHomePage();
       this.renderHome();
       this.updateStats();
@@ -717,19 +742,31 @@ class QuestRecallApp {
       card.dataset.topicKey = topicKey;
 
       card.innerHTML = `
-          <div class="subject-icon">${subject.icon}</div>
-          <div class="subject-name">${topic.name}</div>
-          <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
-        `;
+                        <div class="subject-icon">${subject.icon}</div>
+                        <div class="subject-name">${topic.name}</div>
+                        <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
+                    `;
 
       card.addEventListener("click", () => {
         this.currentFilter = { subjectKey, topicKey };
+        this.resetRandomization();
         this.showHomePage();
         this.renderHome();
         this.updateStats();
       });
       container.appendChild(card);
     });
+  }
+
+  // Reset randomization
+  resetRandomization() {
+    this.isRandomized = false;
+    this.randomizedOrder = [];
+    const randomizeBtn = document.getElementById("randomizeBtn");
+    if (randomizeBtn) {
+      randomizeBtn.textContent = "🎲 Randomize";
+      randomizeBtn.classList.remove("active");
+    }
   }
 
   // Add helper method to get due questions for a subject
@@ -811,12 +848,24 @@ class QuestRecallApp {
     if (importantPage) importantPage.classList.add("active");
   }
 
-  // Toggle randomization
+  // Toggle randomization - UPDATED to preserve order until explicitly changed
   toggleRandomization() {
     this.isRandomized = !this.isRandomized;
     const btn = document.getElementById("randomizeBtn");
     if (btn) {
-      btn.textContent = this.isRandomized ? "🎯 Ordered" : "🎲 Randomize";
+      if (this.isRandomized) {
+        btn.textContent = "🎯 Ordered";
+        btn.classList.add("active");
+        // Create a new randomized order
+        this.randomizedOrder = [];
+        const dueQuestions = this.getDueQuestions();
+        this.randomizedOrder = dueQuestions.map((q) => q.id);
+        this.shuffleArray(this.randomizedOrder);
+      } else {
+        btn.textContent = "🎲 Randomize";
+        btn.classList.remove("active");
+        this.randomizedOrder = [];
+      }
     }
 
     if (this.showingImportant) {
@@ -899,7 +948,6 @@ class QuestRecallApp {
 
     // Back buttons
     const backToHome = document.getElementById("backToHome");
-
     const backToHomeFromImportant = document.getElementById(
       "backToHomeFromImportant"
     );
@@ -913,8 +961,8 @@ class QuestRecallApp {
     if (backToHomeFromImportant)
       backToHomeFromImportant.addEventListener("click", () => {
         this.clearSubjectFilter();
-        this.showHomePage()}
-      );
+        this.showHomePage();
+      });
 
     // Rating buttons
     document.addEventListener("click", (e) => {
