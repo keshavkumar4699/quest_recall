@@ -218,17 +218,6 @@ class QuestRecallApp {
   getDueQuestions() {
     const now = new Date();
     return this.questions.filter((q) => {
-      if (this.currentFilter && q.subjectKey !== this.currentFilter) {
-        return false;
-      }
-      // Include questions due today (including never attempted)
-      return q.nextReview <= now || q.rating === null;
-    });
-  }
-
-  getDueQuestions() {
-    const now = new Date();
-    return this.questions.filter((q) => {
       if (this.currentFilter) {
         if (
           this.currentFilter.subjectKey &&
@@ -385,17 +374,6 @@ class QuestRecallApp {
     const retentionEl = document.getElementById("retention");
     const progressEl = document.getElementById("progress");
 
-    console.log("Stats Debug:", {
-      cardsDueToday,
-      dueQuestionsOverall,
-      retentionRate,
-      progressVsYesterday,
-      todayAttempts,
-      yesterdayAttempts,
-      ratingCounts: this.stats.ratingCounts,
-      totalAnswers: this.stats.totalAnswers,
-    });
-
     // Update UI with proper values
     if (cardsDueTodayEl) cardsDueTodayEl.textContent = cardsDueToday;
     if (dueOverallEl) dueOverallEl.textContent = dueQuestionsOverall;
@@ -415,10 +393,15 @@ class QuestRecallApp {
     const container = document.getElementById("questionsContainer");
     const noQuestions = document.getElementById("noQuestions");
     const currentSubjectText = document.getElementById("currentSubjectText");
-    const clearFilter = document.getElementById("clearFilter");
-
     const backToTopics = document.getElementById("backToTopics");
-    if (this.currentFilter.topicKey) {
+
+    // Hide other pages when showing home page
+    document.getElementById("subjectPage").classList.remove("active");
+    document.getElementById("topicPage").classList.remove("active");
+    document.getElementById("importantPage").classList.remove("active");
+
+    // Show back to topics button only if a topic is selected
+    if (this.currentFilter && this.currentFilter.topicKey) {
       backToTopics.classList.remove("hidden");
     } else {
       backToTopics.classList.add("hidden");
@@ -437,16 +420,9 @@ class QuestRecallApp {
       if (currentSubjectText) {
         currentSubjectText.textContent = displayText;
       }
-
-      if (clearFilter) {
-        clearFilter.classList.remove("hidden");
-      }
     } else {
       if (currentSubjectText) {
         currentSubjectText.textContent = "All Subjects";
-      }
-      if (clearFilter) {
-        clearFilter.classList.add("hidden");
       }
     }
 
@@ -507,38 +483,38 @@ class QuestRecallApp {
     card.dataset.questionId = question.id;
 
     card.innerHTML = `
-      <div class="question-header">
-        <span class="subject-badge">${question.subject}</span>
-        <button class="star-btn ${
-          question.important ? "important" : ""
-        }" data-question-id="${question.id}">
-          ${question.important ? "🌟" : "⭐"}
-        </button>
-      </div>
-      <div class="question-text">${question.text}</div>
-      <div class="rating-buttons">
-        <button class="rating-btn rating-again" data-rating="again" data-question-id="${
-          question.id
-        }">
-          Again<br><span class="rating-time">Tomorrow</span>
-        </button>
-        <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
-          question.id
-        }">
-          Hard<br><span class="rating-time">3 days</span>
-        </button>
-        <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
-          question.id
-        }">
-          Medium<br><span class="rating-time">7 days</span>
-        </button>
-        <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
-          question.id
-        }">
-          Easy<br><span class="rating-time">14 days</span>
-        </button>
-      </div>
-    `;
+            <div class="question-header">
+              <span class="subject-badge">${question.subject}</span>
+              <button class="star-btn ${
+                question.important ? "important" : ""
+              }" data-question-id="${question.id}">
+                ${question.important ? "🌟" : "⭐"}
+              </button>
+            </div>
+            <div class="question-text">${question.text}</div>
+            <div class="rating-buttons">
+              <button class="rating-btn rating-again" data-rating="again" data-question-id="${
+                question.id
+              }">
+                Again<br><span class="rating-time">Tomorrow</span>
+              </button>
+              <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
+                question.id
+              }">
+                Hard<br><span class="rating-time">3 days</span>
+              </button>
+              <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
+                question.id
+              }">
+                Medium<br><span class="rating-time">7 days</span>
+              </button>
+              <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
+                question.id
+              }">
+                Easy<br><span class="rating-time">14 days</span>
+              </button>
+            </div>
+          `;
     return card;
   }
 
@@ -575,8 +551,6 @@ class QuestRecallApp {
     const question = this.questions.find((q) => q.id === questionId);
     if (!question) return;
 
-    console.log(`Rating question ${questionId} as ${rating}`);
-
     // Calculate next review using SRS
     const srsData = this.calculateNextReview(question, rating);
     Object.assign(question, srsData);
@@ -593,12 +567,6 @@ class QuestRecallApp {
     // FIXED: Track rating counts for retention calculation
     this.stats.ratingCounts[rating]++;
     this.stats.totalAnswers++;
-
-    console.log("Updated stats:", {
-      dailyAttempts: this.stats.dailyAttempts[today],
-      totalAnswers: this.stats.totalAnswers,
-      ratingCounts: this.stats.ratingCounts,
-    });
 
     // Animate card out
     const card = document.querySelector(`[data-question-id="${questionId}"]`);
@@ -677,12 +645,12 @@ class QuestRecallApp {
       card.dataset.subjectKey = key;
 
       card.innerHTML = `
-                <div class="subject-icon">${subject.icon}</div>
-                <div class="subject-name">${subject.name}</div>
-                <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
-            `;
+                      <div class="subject-icon">${subject.icon}</div>
+                      <div class="subject-name">${subject.name}</div>
+                      <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
+                  `;
 
-      card.addEventListener("click", () => this.setSubjectFilter(key));
+      card.addEventListener("click", () => this.showTopicsPage(key));
       container.appendChild(card);
     });
 
@@ -690,27 +658,20 @@ class QuestRecallApp {
     const allCard = document.createElement("div");
     allCard.className = "subject-card";
     allCard.innerHTML = `
-            <div class="subject-icon">📚</div>
-            <div class="subject-name">All Subjects</div>
-            <div class="subject-count">${
-              this.getDueQuestions().length
-            } due</div>
-        `;
+                  <div class="subject-icon">📚</div>
+                  <div class="subject-name">All Subjects</div>
+                  <div class="subject-count">${
+                    this.getDueQuestions().length
+                  } due</div>
+              `;
     allCard.addEventListener("click", () => this.clearSubjectFilter());
     container.insertBefore(allCard, container.firstChild);
   }
 
-  // Set subject filter
-  setSubjectFilter(subjectKey) {
-    this.currentFilter = subjectKey;
-    this.showHomePage();
-    this.renderHome();
-    this.updateStats();
-  }
-
   // Clear subject filter
   clearSubjectFilter() {
-    this.currentFilter = null;
+    this.currentFilter = { subjectKey: null, topicKey: null };
+    this.showHomePage();
     this.renderHome();
     this.updateStats();
   }
@@ -728,12 +689,12 @@ class QuestRecallApp {
     const allTopicsCard = document.createElement("div");
     allTopicsCard.className = "subject-card";
     allTopicsCard.innerHTML = `
-    <div class="subject-icon">📚</div>
-    <div class="subject-name">All Topics</div>
-    <div class="subject-count">${
-      this.getDueQuestionsForSubject(subjectKey).length
-    } due</div>
-  `;
+          <div class="subject-icon">📚</div>
+          <div class="subject-name">All Topics</div>
+          <div class="subject-count">${
+            this.getDueQuestionsForSubject(subjectKey).length
+          } due</div>
+        `;
     allTopicsCard.addEventListener("click", () => {
       this.currentFilter = { subjectKey, topicKey: null };
       this.showHomePage();
@@ -756,10 +717,10 @@ class QuestRecallApp {
       card.dataset.topicKey = topicKey;
 
       card.innerHTML = `
-      <div class="subject-icon">${subject.icon}</div>
-      <div class="subject-name">${topic.name}</div>
-      <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
-    `;
+          <div class="subject-icon">${subject.icon}</div>
+          <div class="subject-name">${topic.name}</div>
+          <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
+        `;
 
       card.addEventListener("click", () => {
         this.currentFilter = { subjectKey, topicKey };
@@ -778,11 +739,6 @@ class QuestRecallApp {
       if (q.subjectKey !== subjectKey) return false;
       return q.nextReview <= now || q.rating === null;
     });
-  }
-
-  // Update the setSubjectFilter method to show topics instead of filtering directly
-  setSubjectFilter(subjectKey) {
-    this.showTopicsPage(subjectKey);
   }
 
   // Add method to show topics page
@@ -816,10 +772,12 @@ class QuestRecallApp {
     this.showingImportant = false;
     const homePage = document.getElementById("homePage");
     const subjectPage = document.getElementById("subjectPage");
+    const topicPage = document.getElementById("topicPage");
     const importantPage = document.getElementById("importantPage");
 
     if (homePage) homePage.classList.add("active");
     if (subjectPage) subjectPage.classList.remove("active");
+    if (topicPage) topicPage.classList.remove("active");
     if (importantPage) importantPage.classList.remove("active");
   }
 
@@ -829,10 +787,12 @@ class QuestRecallApp {
     this.renderSubjects();
     const homePage = document.getElementById("homePage");
     const subjectPage = document.getElementById("subjectPage");
+    const topicPage = document.getElementById("topicPage");
     const importantPage = document.getElementById("importantPage");
 
     if (homePage) homePage.classList.remove("active");
     if (subjectPage) subjectPage.classList.add("active");
+    if (topicPage) topicPage.classList.remove("active");
     if (importantPage) importantPage.classList.remove("active");
   }
 
@@ -842,10 +802,12 @@ class QuestRecallApp {
     this.renderImportantQuestions();
     const homePage = document.getElementById("homePage");
     const subjectPage = document.getElementById("subjectPage");
+    const topicPage = document.getElementById("topicPage");
     const importantPage = document.getElementById("importantPage");
 
     if (homePage) homePage.classList.remove("active");
     if (subjectPage) subjectPage.classList.remove("active");
+    if (topicPage) topicPage.classList.remove("active");
     if (importantPage) importantPage.classList.add("active");
   }
 
@@ -890,9 +852,18 @@ class QuestRecallApp {
     const importantBtn = document.getElementById("importantBtn");
     const backToSubjects = document.getElementById("backToSubjects");
     const backToTopics = document.getElementById("backToTopics");
+
+    // Logo click event - FIXED: Now goes to home page
+    const logo = document.getElementById("appLogo");
+    if (logo) {
+      logo.addEventListener("click", () => {
+        this.clearSubjectFilter();
+      });
+    }
+
     if (backToTopics) {
       backToTopics.addEventListener("click", () => {
-        // Hide Home, show Topic list
+        // Show Topic list, hide Home
         document.getElementById("homePage").classList.remove("active");
         document.getElementById("topicPage").classList.add("active");
         // Clear only the topic filter
@@ -906,14 +877,6 @@ class QuestRecallApp {
     if (backToSubjects) {
       backToSubjects.addEventListener("click", () => this.showSubjectsPage());
     }
-    const logo = document.getElementById("appLogo");
-    if (logo) {
-      logo.addEventListener("click", () => {
-        this.showingImportant = false;
-        this.renderHome();
-        this.updateStats();
-      });
-    }
 
     if (subjectBtn)
       subjectBtn.addEventListener("click", () => this.showSubjectsPage());
@@ -924,17 +887,10 @@ class QuestRecallApp {
         this.showingImportant = !this.showingImportant;
         this.currentFilter.topicKey = null;
 
-        document.getElementById("homePage").classList.remove("active");
-        document.getElementById("subjectPage").classList.remove("active");
-        document.getElementById("topicPage").classList.remove("active");
-        document.getElementById("importantPage").classList.remove("active");
-
         if (this.showingImportant) {
-          document.getElementById("importantPage").classList.add("active");
-          this.renderImportantQuestions();
+          this.showImportantPage();
         } else {
-          document.getElementById("homePage").classList.add("active");
-          this.renderHome();
+          this.showHomePage();
         }
 
         this.updateStats();
@@ -943,22 +899,24 @@ class QuestRecallApp {
 
     // Back buttons
     const backToHome = document.getElementById("backToHome");
+
     const backToHomeFromImportant = document.getElementById(
       "backToHomeFromImportant"
     );
 
     if (backToHome)
-      backToHome.addEventListener("click", () => this.showHomePage());
+      backToHome.addEventListener("click", () => {
+        this.clearSubjectFilter();
+        this.showHomePage();
+      });
+
     if (backToHomeFromImportant)
-      backToHomeFromImportant.addEventListener("click", () =>
-        this.showHomePage()
+      backToHomeFromImportant.addEventListener("click", () => {
+        this.clearSubjectFilter();
+        this.showHomePage()}
       );
 
-    // Clear filter button
-    const clearFilter = document.getElementById("clearFilter");
-    if (clearFilter)
-      clearFilter.addEventListener("click", () => this.clearSubjectFilter());
-
+    // Rating buttons
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".rating-btn");
       if (!btn) return;
@@ -967,43 +925,13 @@ class QuestRecallApp {
       this.rateQuestion(parseInt(questionId), rating);
     });
 
+    // Star buttons
     document.addEventListener("click", (e) => {
       const starBtn = e.target.closest(".star-btn");
       if (!starBtn) return;
       const questionId = starBtn.dataset.questionId;
       this.toggleImportant(parseInt(questionId));
     });
-
-    // Modal events
-    const ratingModal = document.getElementById("ratingModal");
-    if (ratingModal) {
-      ratingModal.addEventListener("click", (e) => {
-        if (e.target.classList.contains("modal-overlay")) {
-          this.hideQuestionModal();
-        }
-      });
-    }
-
-    // Modal rating buttons
-    document.querySelectorAll("#ratingModal .rating-btn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const rating = e.target.dataset.rating;
-        if (this.currentQuestionId) {
-          this.rateQuestion(this.currentQuestionId, rating);
-        }
-      });
-    });
-
-    // Modal star button
-    const modalStarBtn = document.getElementById("modalStarBtn");
-    if (modalStarBtn) {
-      modalStarBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const questionId = e.target.dataset.questionId;
-        this.toggleImportant(parseInt(questionId));
-      });
-    }
 
     // Practice more button
     const addMoreBtn = document.getElementById("addMoreBtn");

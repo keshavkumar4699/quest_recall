@@ -12,10 +12,16 @@
       <header class="header">
         <div class="header-content">
           <h1 class="logo" id="appLogo" style="cursor: pointer">QuestRecall</h1>
-        <div class="header-actions">
-            <button id="randomizeBtn" class="btn btn--outline btn--sm">🎲 Randomize</button>
-            <button id="importantBtn" class="btn btn--outline btn--sm">⭐ Important</button>
-            <button id="subjectBtn" class="btn btn--primary btn--sm">📚 Change Subject</button>
+          <div class="header-actions">
+            <button id="randomizeBtn" class="btn btn--outline btn--sm">
+              🎲 Randomize
+            </button>
+            <button id="importantBtn" class="btn btn--outline btn--sm">
+              ⭐ Important
+            </button>
+            <button id="subjectBtn" class="btn btn--primary btn--sm">
+              📚 Change Subject
+            </button>
           </div>
         </div>
       </header>
@@ -48,24 +54,28 @@
         <div id="homePage" class="page active">
           <div class="current-subject">
             <span id="currentSubjectText">All Subjects</span>
+            <button id="backToTopics" class="btn btn--outline btn-sm hidden">
+              ← Back to Topics
+            </button>
           </div>
-          <button id="backToTopics" class="btn btn--outline btn--sm hidden">
-            Back to Topics
-          </button>
           <div class="questions-container" id="questionsContainer"></div>
           <div id="noQuestions" class="no-questions hidden">
             <div class="no-questions-icon">🎉</div>
             <h3>All Done for Today!</h3>
             <p>You've completed all your due cards. Great work!</p>
-            <button id="addMoreBtn" class="btn btn--primary">Practice More</button>
+            <button id="addMoreBtn" class="btn btn--primary">
+              Practice More
+            </button>
           </div>
         </div>
 
         <!-- Subject Selection Page -->
         <div id="subjectPage" class="page">
           <div class="page-header">
-            <button id="backToHome" class="btn btn--outline">← Back to Home</button>
             <h4>Select Subject</h4>
+            <button id="backToHome" class="btn btn--outline">
+              ← Back to Home
+            </button>
           </div>
           <div class="subjects-grid" id="subjectsGrid"></div>
         </div>
@@ -73,8 +83,10 @@
         <!-- Topic Selection Page -->
         <div id="topicPage" class="page">
           <div class="page-header">
-            <button id="backToSubjects" class="btn btn--outline">← Back to Subjects</button>
             <h4>Select Topic for <span id="currentSubjectName"></span></h4>
+            <button id="backToSubjects" class="btn btn--outline">
+              ← Back to Subjects
+            </button>
           </div>
           <div class="subjects-grid" id="topicsGrid"></div>
         </div>
@@ -82,10 +94,15 @@
         <!-- Important Questions Page -->
         <div id="importantPage" class="page">
           <div class="page-header">
-            <button id="backToHomeFromImportant" class="btn btn--outline">← Back to Home</button>
+            <button id="backToHomeFromImportant" class="btn btn--outline">
+              ← Back to Home
+            </button>
             <h4>Important Questions</h4>
           </div>
-          <div class="questions-container" id="importantQuestionsContainer"></div>
+          <div
+            class="questions-container"
+            id="importantQuestionsContainer"
+          ></div>
           <div id="noImportantQuestions" class="no-questions hidden">
             <div class="no-questions-icon">⭐</div>
             <h3>No Important Questions</h3>
