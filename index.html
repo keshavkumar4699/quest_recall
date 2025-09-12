@@ -12,7 +12,7 @@
       <header class="header">
         <div class="header-content">
           <h1 class="logo" id="appLogo" style="cursor: pointer">QuestRecall</h1>
-          <div class="header-actions">
+        <div class="header-actions">
             <button id="randomizeBtn" class="btn btn--outline btn--sm">🎲 Randomize</button>
             <button id="importantBtn" class="btn btn--outline btn--sm">⭐ Important</button>
             <button id="subjectBtn" class="btn btn--primary btn--sm">📚 Change Subject</button>
@@ -48,9 +48,10 @@
         <div id="homePage" class="page active">
           <div class="current-subject">
             <span id="currentSubjectText">All Subjects</span>
-            <!-- Removed clearFilter -->
-            <button id="backToTopics" class="btn btn--outline btn--sm hidden">← Back to Topics</button>
           </div>
+          <button id="backToTopics" class="btn btn--outline btn--sm hidden">
+            Back to Topics
+          </button>
           <div class="questions-container" id="questionsContainer"></div>
           <div id="noQuestions" class="no-questions hidden">
             <div class="no-questions-icon">🎉</div>
@@ -64,7 +65,7 @@
         <div id="subjectPage" class="page">
           <div class="page-header">
             <button id="backToHome" class="btn btn--outline">← Back to Home</button>
-            <h2>Select Subject</h2>
+            <h4>Select Subject</h4>
           </div>
           <div class="subjects-grid" id="subjectsGrid"></div>
         </div>
@@ -73,7 +74,7 @@
         <div id="topicPage" class="page">
           <div class="page-header">
             <button id="backToSubjects" class="btn btn--outline">← Back to Subjects</button>
-            <h2>Select Topic for <span id="currentSubjectName"></span></h2>
+            <h4>Select Topic for <span id="currentSubjectName"></span></h4>
           </div>
           <div class="subjects-grid" id="topicsGrid"></div>
         </div>
@@ -82,7 +83,7 @@
         <div id="importantPage" class="page">
           <div class="page-header">
             <button id="backToHomeFromImportant" class="btn btn--outline">← Back to Home</button>
-            <h2>Important Questions</h2>
+            <h4>Important Questions</h4>
           </div>
           <div class="questions-container" id="importantQuestionsContainer"></div>
           <div id="noImportantQuestions" class="no-questions hidden">
@@ -92,34 +93,6 @@
           </div>
         </div>
       </main>
-    </div>
-
-    <!-- Rating Modal -->
-    <div id="ratingModal" class="modal hidden">
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="question-card-large">
-          <div class="question-header">
-            <span class="subject-badge" id="modalSubject"></span>
-            <button class="star-btn" id="modalStarBtn">⭐</button>
-          </div>
-          <div class="question-text" id="modalQuestion"></div>
-          <div class="rating-buttons">
-            <button class="rating-btn rating-again" data-rating="again">
-              Again<br /><span class="rating-time">Tomorrow</span>
-            </button>
-            <button class="rating-btn rating-hard" data-rating="hard">
-              Hard<br /><span class="rating-time">3 day</span>
-            </button>
-            <button class="rating-btn rating-medium" data-rating="medium">
-              Medium<br /><span class="rating-time">7 days</span>
-            </button>
-            <button class="rating-btn rating-easy" data-rating="easy">
-              Easy<br /><span class="rating-time">14 days</span>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <script src="app.js"></script>

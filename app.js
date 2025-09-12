@@ -507,47 +507,38 @@ class QuestRecallApp {
     card.dataset.questionId = question.id;
 
     card.innerHTML = `
-            <div class="question-header">
-                <span class="subject-badge">${question.subject}</span>
-                <button class="star-btn ${
-                  question.important ? "important" : ""
-                }"
-                        data-question-id="${question.id}">
-                    ${question.important ? "⭐" : "☆"}
-                </button>
-            </div>
-            <div class="question-text">${question.text}</div>
-            <div class="rating-buttons">
-                <button class="rating-btn rating-again" data-rating="again" data-question-id="${
-                  question.id
-                }">
-                    Again<br><span class="rating-time">Tomorrow</span>
-                </button>
-                <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
-                  question.id
-                }">
-                    Hard<br><span class="rating-time">3 days</span>
-                </button>
-                <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
-                  question.id
-                }">
-                    Medium<br><span class="rating-time">7 days</span>
-                </button>
-                <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
-                  question.id
-                }">
-                    Easy<br><span class="rating-time">14 days</span>
-                </button>
-            </div>
-        `;
-
-    // Add click handler for the card
-    card.addEventListener("click", (e) => {
-      if (!e.target.closest(".rating-btn") && !e.target.closest(".star-btn")) {
-        this.showQuestionModal(question);
-      }
-    });
-
+      <div class="question-header">
+        <span class="subject-badge">${question.subject}</span>
+        <button class="star-btn ${
+          question.important ? "important" : ""
+        }" data-question-id="${question.id}">
+          ${question.important ? "🌟" : "⭐"}
+        </button>
+      </div>
+      <div class="question-text">${question.text}</div>
+      <div class="rating-buttons">
+        <button class="rating-btn rating-again" data-rating="again" data-question-id="${
+          question.id
+        }">
+          Again<br><span class="rating-time">Tomorrow</span>
+        </button>
+        <button class="rating-btn rating-hard" data-rating="hard" data-question-id="${
+          question.id
+        }">
+          Hard<br><span class="rating-time">3 days</span>
+        </button>
+        <button class="rating-btn rating-medium" data-rating="medium" data-question-id="${
+          question.id
+        }">
+          Medium<br><span class="rating-time">7 days</span>
+        </button>
+        <button class="rating-btn rating-easy" data-rating="easy" data-question-id="${
+          question.id
+        }">
+          Easy<br><span class="rating-time">14 days</span>
+        </button>
+      </div>
+    `;
     return card;
   }
 
@@ -652,10 +643,10 @@ class QuestRecallApp {
       starBtns.forEach((btn) => {
         if (question.important) {
           btn.classList.add("important");
-          btn.textContent = "⭐";
+          btn.textContent = "🌟";
         } else {
           btn.classList.remove("important");
-          btn.textContent = "☆";
+          btn.textContent = "⭐";
         }
       });
 
