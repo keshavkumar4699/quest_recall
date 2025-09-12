@@ -863,11 +863,10 @@ select.form-control {
 
 /* Question Cards with Hand-drawn Styling */
 .question-card {
-  background-color: var(--color-surface);
+  background-color: var(--color-background);
   border-radius: 16px 19px 15px 18px; /* Organic, hand-drawn borders */
   border: 2px solid;
   padding: var(--space-20);
-  cursor: pointer;
   transition: all var(--duration-normal) var(--ease-standard);
   position: relative;
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.08), 1px 2px 4px rgba(0, 0, 0, 0.04);

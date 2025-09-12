@@ -959,20 +959,19 @@ class QuestRecallApp {
     if (clearFilter)
       clearFilter.addEventListener("click", () => this.clearSubjectFilter());
 
-    // Rating buttons event delegation
     document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("rating-btn")) {
-        e.stopPropagation();
-        const rating = e.target.dataset.rating;
-        const questionId = e.target.dataset.questionId;
-        this.rateQuestion(parseInt(questionId), rating);
-      }
+      const btn = e.target.closest(".rating-btn");
+      if (!btn) return;
+      const rating = btn.dataset.rating;
+      const questionId = btn.dataset.questionId;
+      this.rateQuestion(parseInt(questionId), rating);
+    });
 
-      if (e.target.classList.contains("star-btn")) {
-        e.stopPropagation();
-        const questionId = e.target.dataset.questionId;
-        this.toggleImportant(parseInt(questionId));
-      }
+    document.addEventListener("click", (e) => {
+      const starBtn = e.target.closest(".star-btn");
+      if (!starBtn) return;
+      const questionId = starBtn.dataset.questionId;
+      this.toggleImportant(parseInt(questionId));
     });
 
     // Modal events
