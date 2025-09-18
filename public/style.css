@@ -1069,7 +1069,181 @@ select.form-control {
 .subject-card {
   background-color: var(--color-surface);
   border: 2px solid var(--color-card-border);
-  border-radius: 18px 15px 19px 16px; /* Hand-drawn style */
+  border-radius: 18px 21px 17px 20px; /* Hand-drawn borders */
+  padding: var(--space-20);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  box-shadow: var(--shadow-sm);
+}
+
+.subject-card:hover {
+  transform: translateY(-4px) rotate(0.5deg);
+  box-shadow: var(--shadow-md);
+}
+
+.subject-card.create-card {
+  border-style: dashed;
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, 
+    rgba(var(--color-primary), 0.05) 0%, 
+    rgba(var(--color-primary), 0.1) 100%);
+}
+
+.subject-card.create-card:hover {
+  background: linear-gradient(135deg, 
+    rgba(var(--color-primary), 0.1) 0%, 
+    rgba(var(--color-primary), 0.15) 100%);
+}
+
+.subject-icon {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-12);
+}
+
+.subject-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+.subject-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Create Question Card */
+.question-card.create-card {
+  border-style: dashed;
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, 
+    rgba(var(--color-primary), 0.05) 0%, 
+    rgba(var(--color-primary), 0.1) 100%);
+  cursor: pointer;
+}
+
+.question-card.create-card:hover {
+  background: linear-gradient(135deg, 
+    rgba(var(--color-primary), 0.1) 0%, 
+    rgba(var(--color-primary), 0.15) 100%);
+  transform: translateY(-4px) rotate(0.5deg);
+}
+
+.create-question-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-8);
+}
+
+/* No Questions Card */
+.question-card.no-questions-card {
+  border-color: var(--color-success);
+  background: linear-gradient(135deg, 
+    rgba(var(--color-success), 0.05) 0%, 
+    rgba(var(--color-success), 0.1) 100%);
+}
+
+.practice-more-btn {
+  margin-top: var(--space-12);
+}
+
+/* Practice More Info Card */
+.question-card.practice-more-info-card {
+  border-color: var(--color-warning);
+  background: linear-gradient(135deg, 
+    rgba(var(--color-warning), 0.05) 0%, 
+    rgba(var(--color-warning), 0.1) 100%);
+}
+
+.back-to-due-btn {
+  margin-left: auto;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-20);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: var(--space-4);
+}
+
+.modal-close:hover {
+  color: var(--color-text);
+}
+
+.modal-body {
+  padding: var(--space-20);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-12);
+  justify-content: flex-end;
+  margin-top: var(--space-24);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .questions-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+}px 15px 19px 16px; /* Hand-drawn style */
   padding: var(--space-24);
   cursor: pointer;
   transition: all var(--duration-normal) var(--ease-standard);

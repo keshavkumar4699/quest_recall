@@ -10,7 +10,7 @@ class QuestRecallApp {
     this.stats = this.loadStats();
     this.currentQuestionId = null;
     this.showingImportant = false;
-    this.currentSubjectId = null; // For context when creating topics/questions
+    this.currentSubjectId = null;
     this.init();
   }
 
@@ -317,6 +317,14 @@ class QuestRecallApp {
 
     if (noQuestions) noQuestions.classList.add("hidden");
 
+    // Apply randomization if enabled
+    let questionsToRender = [...dueQuestions];
+    if (this.isRandomized && this.randomizedOrder.length > 0) {
+      questionsToRender = this.randomizedOrder
+        .map((id) => dueQuestions.find((q) => q._id === id))
+        .filter((q) => q !== undefined);
+    }
+
     // Group questions by rating
     const questionGroups = {
       again: [],
@@ -325,21 +333,23 @@ class QuestRecallApp {
       easy: [],
     };
 
-    dueQuestions.forEach((q) => {
+    questionsToRender.forEach((q) => {
       const rating = q.rating || "again";
       if (questionGroups[rating]) {
         questionGroups[rating].push(q);
       }
     });
 
-    // Sort by importance within each group
-    Object.keys(questionGroups).forEach((rating) => {
-      questionGroups[rating].sort((a, b) => {
-        if (a.important && !b.important) return -1;
-        if (!a.important && b.important) return 1;
-        return 0;
+    // Sort by importance within each group (only if not randomized)
+    if (!this.isRandomized) {
+      Object.keys(questionGroups).forEach((rating) => {
+        questionGroups[rating].sort((a, b) => {
+          if (a.important && !b.important) return -1;
+          if (!a.important && b.important) return 1;
+          return 0;
+        });
       });
-    });
+    }
 
     // Render questions by rating priority
     const ratingOrder = ["again", "hard", "medium", "easy"];
@@ -573,13 +583,12 @@ class QuestRecallApp {
     this.renderTopics(subjectId);
   }
 
-  // Render topics with multi-select
+  // Render topics - SIMPLIFIED: Single topic selection
   renderTopics(subjectId) {
     const container = document.getElementById("topicsGrid");
     if (!container) return;
 
     container.innerHTML = "";
-    this.selectedTopics.clear();
 
     const subject = this.subjects.find((s) => s._id === subjectId);
     if (!subject) return;
@@ -595,6 +604,26 @@ class QuestRecallApp {
     createCard.addEventListener("click", () => this.showCreateTopic());
     container.appendChild(createCard);
 
+    // Add "All Topics" option
+    const allTopicsCard = document.createElement("div");
+    allTopicsCard.className = "subject-card";
+    allTopicsCard.innerHTML = `
+      <div class="subject-icon">📚</div>
+      <div class="subject-name">All Topics</div>
+      <div class="subject-count">${this.getSubjectQuestionCount(
+        subjectId
+      )} questions</div>
+    `;
+    allTopicsCard.addEventListener("click", () => {
+      this.currentFilter.subjectId = subjectId;
+      this.currentFilter.topicNames = [];
+      this.resetRandomization();
+      this.showHomePage();
+      this.renderHome();
+      this.updateStats();
+    });
+    container.appendChild(allTopicsCard);
+
     if (subject.topics && subject.topics.length > 0) {
       subject.topics.forEach((topic) => {
         const topicQuestions = this.questions.filter(
@@ -605,82 +634,49 @@ class QuestRecallApp {
         ).length;
 
         const card = document.createElement("div");
-        card.className = "subject-card topic-card";
+        card.className = "subject-card";
         card.dataset.topicName = topic.name;
 
         card.innerHTML = `
-          <div class="topic-checkbox">
-            <input type="checkbox" id="topic-${topic.name}">
-          </div>
           <div class="subject-icon">${subject.icon}</div>
           <div class="subject-name">${topic.name}</div>
           <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
         `;
 
-        const checkbox = card.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener("change", (e) => {
-          e.stopPropagation(); // Prevent card click when clicking checkbox
-          if (e.target.checked) {
-            this.selectedTopics.add(topic.name);
-            card.classList.add("selected");
-          } else {
-            this.selectedTopics.delete(topic.name);
-            card.classList.remove("selected");
-          }
-          this.updateSelectedTopicsCount();
-        });
-
-        // Add click handler for the card (but not checkbox area)
-        card.addEventListener("click", (e) => {
-          // If clicking on checkbox or its container, let checkbox handler deal with it
-          if (
-            e.target.type === "checkbox" ||
-            e.target.closest(".topic-checkbox")
-          )
-            return;
-
-          // Otherwise, go to questions for this single topic
-          console.log(
-            "Topic card clicked:",
-            topic.name,
-            "for subject:",
-            subjectId
-          );
+        card.addEventListener("click", () => {
           this.currentFilter.subjectId = subjectId;
           this.currentFilter.topicNames = [topic.name];
-          console.log("Filter set to:", this.currentFilter);
+          this.resetRandomization();
           this.showHomePage();
           this.renderHome();
+          this.updateStats();
         });
 
         container.appendChild(card);
       });
     }
-
-    this.updateSelectedTopicsCount();
   }
 
-  // Update selected topics count
-  updateSelectedTopicsCount() {
-    const countEl = document.getElementById("selectedTopicsCount");
-    if (countEl) {
-      countEl.textContent = this.selectedTopics.size;
-    }
+  // Helper method to get subject question count
+  getSubjectQuestionCount(subjectId) {
+    return this.questions.filter((q) => q.subject._id === subjectId).length;
   }
 
-  // Clear subject filter
+  // Clear subject filter - FIXED: Always show all questions when going back to home
   clearSubjectFilter() {
     this.currentFilter = { subjectId: null, topicNames: [] };
     this.selectedTopics.clear();
     this.currentSubjectId = null;
+    this.showingImportant = false; // Reset important view
     this.resetRandomization();
     this.showHomePage();
     this.renderHome();
     this.updateStats();
   }
 
-  // Show home page
+  // Show home page - FIXED: Reset important view when going home
   showHomePage() {
+    this.showingImportant = false; // Always reset when going to home
     this.hideAllPages();
     document.getElementById("homePage").classList.add("active");
   }
@@ -693,6 +689,48 @@ class QuestRecallApp {
     if (randomizeBtn) {
       randomizeBtn.textContent = "🎲 Randomize";
       randomizeBtn.classList.remove("active");
+    }
+  }
+
+  // FIXED: Toggle randomization functionality
+  toggleRandomization() {
+    this.isRandomized = !this.isRandomized;
+    const btn = document.getElementById("randomizeBtn");
+
+    if (this.isRandomized) {
+      // Create new randomized order
+      const currentQuestions = this.showingImportant
+        ? this.getImportantQuestions()
+        : this.getDueQuestions();
+      this.randomizedOrder = [...currentQuestions.map((q) => q._id)];
+      this.shuffleArray(this.randomizedOrder);
+
+      if (btn) {
+        btn.textContent = "🎯 Ordered";
+        btn.classList.add("active");
+      }
+    } else {
+      // Reset to original order
+      this.randomizedOrder = [];
+      if (btn) {
+        btn.textContent = "🎲 Randomize";
+        btn.classList.remove("active");
+      }
+    }
+
+    // Re-render current view
+    if (this.showingImportant) {
+      this.renderImportantQuestions();
+    } else {
+      this.renderHome();
+    }
+  }
+
+  // Shuffle array utility
+  shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
   }
 
@@ -773,25 +811,40 @@ class QuestRecallApp {
     }
   }
 
-  // Show important questions page
+  // Show important questions page - FIXED: Toggle between important and all questions
   showImportantPage() {
-    this.showingImportant = true;
-    this.hideAllPages();
-    document.getElementById("importantPage").classList.add("active");
-    this.renderImportantQuestions();
+    if (this.showingImportant) {
+      // If already showing important, go back to all questions
+      this.showingImportant = false;
+      this.showHomePage();
+      this.renderHome();
+    } else {
+      // Show important questions
+      this.showingImportant = true;
+      this.hideAllPages();
+      document.getElementById("importantPage").classList.add("active");
+      this.renderImportantQuestions();
+    }
   }
 
-  // Render important questions
+  // Render important questions - FIXED: Support randomization
   renderImportantQuestions() {
     const container = document.getElementById("importantQuestionsContainer");
     const noQuestions = document.getElementById("noImportantQuestions");
 
-    const importantQuestions = this.getImportantQuestions();
+    let importantQuestions = this.getImportantQuestions();
 
     if (importantQuestions.length === 0) {
       if (container) container.innerHTML = "";
       if (noQuestions) noQuestions.classList.remove("hidden");
       return;
+    }
+
+    // Apply randomization if enabled
+    if (this.isRandomized && this.randomizedOrder.length > 0) {
+      importantQuestions = this.randomizedOrder
+        .map((id) => importantQuestions.find((q) => q._id === id))
+        .filter((q) => q !== undefined);
     }
 
     if (noQuestions) noQuestions.classList.add("hidden");
@@ -883,6 +936,38 @@ class QuestRecallApp {
     }
   }
 
+  // Question creation submit handler
+  async handleQuestionSubmit(e) {
+    e.preventDefault();
+    console.log("Question form submitted");
+
+    const data = {
+      text: document.getElementById("questionText").value,
+      subject: document.getElementById("questionSubject").value,
+      topicName: document.getElementById("questionTopic").value,
+    };
+
+    console.log("Question data:", data);
+
+    try {
+      const result = await this.createQuestion(data);
+      console.log("Question created:", result);
+      await this.loadData();
+      this.hideModal("questionModal");
+
+      // Refresh current view
+      if (this.showingImportant) {
+        this.renderImportantQuestions();
+      } else {
+        this.renderHome();
+      }
+      this.updateStats();
+    } catch (error) {
+      console.error("Error creating question:", error);
+      alert("Error creating question: " + error.message);
+    }
+  }
+
   // Question creation
   showCreateQuestion() {
     document.getElementById("questionModalTitle").textContent =
@@ -969,6 +1054,9 @@ class QuestRecallApp {
     document
       .getElementById("importantBtn")
       ?.addEventListener("click", () => this.showImportantPage());
+    document
+      .getElementById("randomizeBtn")
+      ?.addEventListener("click", () => this.toggleRandomization());
     document.getElementById("appLogo")?.addEventListener("click", () => {
       this.clearSubjectFilter();
       this.renderHome();
@@ -995,43 +1083,6 @@ class QuestRecallApp {
         this.showingImportant = false;
         this.showHomePage();
         this.renderHome();
-      });
-
-    // Topic selection controls
-    document
-      .getElementById("selectAllTopics")
-      ?.addEventListener("click", () => {
-        document
-          .querySelectorAll('.topic-card input[type="checkbox"]')
-          .forEach((cb) => {
-            cb.checked = true;
-            cb.dispatchEvent(new Event("change"));
-          });
-      });
-
-    document.getElementById("clearAllTopics")?.addEventListener("click", () => {
-      document
-        .querySelectorAll('.topic-card input[type="checkbox"]')
-        .forEach((cb) => {
-          cb.checked = false;
-          cb.dispatchEvent(new Event("change"));
-        });
-    });
-
-    document
-      .getElementById("viewSelectedTopics")
-      ?.addEventListener("click", () => {
-        console.log(
-          "View Selected Topics clicked, selected:",
-          this.selectedTopics
-        );
-        if (this.selectedTopics.size > 0) {
-          this.currentFilter.subjectId = this.currentSubjectId; // Set the subject filter
-          this.currentFilter.topicNames = Array.from(this.selectedTopics);
-          console.log("Filter set to:", this.currentFilter);
-          this.showHomePage();
-          this.renderHome();
-        }
       });
 
     // Question subject change for topic population
