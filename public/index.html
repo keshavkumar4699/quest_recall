@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuestRecall - Spaced Repetition Learning</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1 class="logo" id="appLogo" style="cursor: pointer">QuestRecall</h1>
+          <div class="header-actions">
+            <button id="randomizeBtn" class="btn btn--outline btn--sm">
+              🎲 Randomize
+            </button>
+            <button id="importantBtn" class="btn btn--outline btn--sm">
+              ⭐ Important
+            </button>
+            <button id="subjectBtn" class="btn btn--primary btn--sm">
+              📚 Change Subject
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Statistics Dashboard -->
+      <section class="stats-dashboard">
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-value" id="cardsDueToday">0</div>
+            <div class="stat-label">Due Today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="dueOverall">0</div>
+            <div class="stat-label">Due Overall</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="retention">0%</div>
+            <div class="stat-label">Retention</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="progress">0</div>
+            <div class="stat-label">+ Progress</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+          <div class="current-subject">
+            <span id="currentSubjectText">All Subjects</span>
+            <button id="backToTopics" class="btn btn--outline btn-sm hidden">
+              ← Back to Topics
+            </button>
+          </div>
+
+          <div class="questions-container" id="questionsContainer"></div>
+          <div id="noQuestions" class="no-questions hidden">
+            <div class="no-questions-icon">🎉</div>
+            <h3>All Done for Today!</h3>
+            <p>You've completed all your due cards. Great work!</p>
+            <button id="addMoreBtn" class="btn btn--primary">
+              Practice More
+            </button>
+          </div>
+        </div>
+
+        <!-- Subject Selection Page -->
+        <div id="subjectPage" class="page">
+          <div class="page-header">
+            <h4>Select Subject</h4>
+            <button id="backToHome" class="btn btn--outline">
+              ← Back to Home
+            </button>
+          </div>
+
+          <div class="subjects-grid" id="subjectsGrid"></div>
+        </div>
+
+        <!-- Topic Selection Page -->
+        <div id="topicPage" class="page">
+          <div class="page-header">
+            <h4>Select Topics for <span id="currentSubjectName"></span></h4>
+            <button id="backToSubjects" class="btn btn--outline">
+              ← Back to Subjects
+            </button>
+          </div>
+
+          <div class="topic-selection-controls">
+            <button id="selectAllTopics" class="btn btn--secondary btn--sm">
+              Select All
+            </button>
+            <button id="clearAllTopics" class="btn btn--outline btn--sm">
+              Clear All
+            </button>
+            <button id="viewSelectedTopics" class="btn btn--primary btn--sm">
+              View Questions (<span id="selectedTopicsCount">0</span>)
+            </button>
+          </div>
+          <div class="subjects-grid" id="topicsGrid"></div>
+        </div>
+
+        <!-- Important Questions Page -->
+        <div id="importantPage" class="page">
+          <div class="page-header">
+            <button id="backToHomeFromImportant" class="btn btn--outline">
+              ← Back to Home
+            </button>
+            <h4>Important Questions</h4>
+          </div>
+          <div
+            class="questions-container"
+            id="importantQuestionsContainer"
+          ></div>
+          <div id="noImportantQuestions" class="no-questions hidden">
+            <div class="no-questions-icon">⭐</div>
+            <h3>No Important Questions</h3>
+            <p>You haven't marked any questions as important yet.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Enhanced Subject Modal -->
+    <div id="subjectModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="subjectModalTitle">Create New Subject</h3>
+          <button class="modal-close" type="button" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="subjectForm">
+            <div class="form-group">
+              <label class="form-label" for="subjectName">Subject Name</label>
+              <input
+                type="text"
+                id="subjectName"
+                name="subjectName"
+                class="form-control"
+                placeholder="Enter subject name (e.g., Mathematics, History)"
+                required
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="subjectIcon">Subject Icon</label>
+              <input
+                type="text"
+                id="subjectIcon"
+                name="subjectIcon"
+                class="form-control"
+                placeholder="Choose an emoji (📚 🧮 🔬 🎨 💻)"
+                required
+                maxlength="2"
+                autocomplete="off"
+              />
+              <small
+                style="
+                  color: var(--color-text-secondary);
+                  font-size: var(--font-size-xs);
+                  margin-top: var(--space-4);
+                  display: block;
+                "
+              >
+                Suggested: 📚 Mathematics, 🧮 Physics, 🔬 Chemistry, 🎨 Art, 💻
+                Programming
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="subjectColor">Theme Color</label>
+              <input
+                type="color"
+                id="subjectColor"
+                name="subjectColor"
+                class="form-control"
+                value="#218085"
+                required
+              />
+              <small
+                style="
+                  color: var(--color-text-secondary);
+                  font-size: var(--font-size-xs);
+                  margin-top: var(--space-4);
+                  display: block;
+                "
+              >
+                This color will be used for the subject's theme
+              </small>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn--outline modal-cancel">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn--primary">
+                Create Subject
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Topic Modal -->
+    <div id="topicModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="topicModalTitle">Create New Topic</h3>
+          <button class="modal-close" type="button" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="topicForm">
+            <div class="form-group">
+              <label class="form-label" for="topicName">Topic Name</label>
+              <input
+                type="text"
+                id="topicName"
+                name="topicName"
+                class="form-control"
+                placeholder="Enter topic name (e.g., Algebra, World War II)"
+                required
+                autocomplete="off"
+              />
+              <small
+                style="
+                  color: var(--color-text-secondary);
+                  font-size: var(--font-size-xs);
+                  margin-top: var(--space-4);
+                  display: block;
+                "
+              >
+                Topics help organize questions within a subject
+              </small>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn--outline modal-cancel">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn--primary">
+                Create Topic
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Question Modal -->
+    <div id="questionModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="questionModalTitle">Create New Question</h3>
+          <button class="modal-close" type="button" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="questionForm">
+            <div class="form-group">
+              <label class="form-label" for="questionSubject">Subject</label>
+              <select
+                id="questionSubject"
+                name="questionSubject"
+                class="form-control"
+                required
+              >
+                <option value="" disabled selected>Choose a subject</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="questionTopic">Topic</label>
+              <select
+                id="questionTopic"
+                name="questionTopic"
+                class="form-control"
+                required
+              >
+                <option value="" disabled selected>
+                  First select a subject
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="questionText">Question</label>
+              <textarea
+                id="questionText"
+                name="questionText"
+                class="form-control"
+                placeholder="Enter your question here..."
+                required
+                rows="6"
+              ></textarea>
+              <small
+                style="
+                  color: var(--color-text-secondary);
+                  font-size: var(--font-size-xs);
+                  margin-top: var(--space-4);
+                  display: block;
+                "
+              >
+                Write clear, specific questions that test your understanding
+              </small>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn--outline modal-cancel">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn--primary">
+                Create Question
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
