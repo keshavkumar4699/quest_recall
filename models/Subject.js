@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const topicSchema = new mongoose.Schema(
   {
@@ -27,10 +27,18 @@ const subjectSchema = new mongoose.Schema(
       required: true,
     },
     topics: [topicSchema],
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("Subject", subjectSchema);
+// Index for efficient queries
+subjectSchema.index({ userId: 1 });
+
+export default mongoose.model("Subject", subjectSchema);

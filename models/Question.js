@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema(
   {
@@ -22,6 +22,11 @@ const questionSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     // SRS properties
     easeFactor: {
       type: Number,
@@ -42,7 +47,7 @@ const questionSchema = new mongoose.Schema(
     rating: {
       type: String,
       enum: ["again", "hard", "medium", "easy"],
-      default: undefined,  // Changed from null to undefined
+      default: null,
     },
     important: {
       type: Boolean,
@@ -58,4 +63,9 @@ const questionSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Question", questionSchema);
+// Index for efficient queries
+questionSchema.index({ userId: 1, nextReview: 1 });
+questionSchema.index({ userId: 1, important: 1 });
+questionSchema.index({ userId: 1, subject: 1 });
+
+export default mongoose.model("Question", questionSchema);

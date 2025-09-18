@@ -1,4 +1,4 @@
-// QuestRecall - Simplified MongoDB Connected App
+// QuestRecall - Complete Multi-User App with Authentication
 class QuestRecallApp {
   constructor() {
     this.questions = [];
@@ -7,136 +7,403 @@ class QuestRecallApp {
     this.selectedTopics = new Set();
     this.isRandomized = false;
     this.randomizedOrder = [];
-    this.stats = this.loadStats();
     this.currentQuestionId = null;
     this.showingImportant = false;
     this.currentSubjectId = null;
+    this.user = null;
+    this.token = this.loadToken();
+    this.stats = { currentStats: {}, userStats: {} };
+    this.editingQuestion = null;
+    this.editingSubject = null;
+    this.editingTopic = null;
     this.init();
+  }
+
+  // Token management
+  loadToken() {
+    return localStorage.getItem("questRecallToken");
+  }
+
+  saveToken(token) {
+    localStorage.setItem("questRecallToken", token);
+    this.token = token;
+  }
+
+  clearToken() {
+    localStorage.removeItem("questRecallToken");
+    this.token = null;
+    this.user = null;
+  }
+
+  // Get auth headers
+  getAuthHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+    return headers;
   }
 
   // Initialize the app
   async init() {
     try {
-      await this.loadData();
-      this.renderHome();
-      this.updateStats();
+      if (this.token) {
+        const verified = await this.verifyToken();
+        if (verified && this.user) {
+          await this.loadData();
+          this.renderHome();
+          this.updateStats();
+          this.showMainApp();
+        } else {
+          this.showAuthPage();
+        }
+      } else {
+        this.showAuthPage();
+      }
       this.bindEvents();
     } catch (error) {
       console.error("Error during initialization:", error);
+      this.showAuthPage();
     }
+  }
+
+  // Verify token and get user data
+  async verifyToken() {
+    try {
+      const response = await fetch("/api/auth/profile", {
+        headers: this.getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.user = data.user;
+        this.stats.userStats = data.user.stats;
+        this.stats.currentStats = data.user.currentStats;
+        return true;
+      } else {
+        this.clearToken();
+        return false;
+      }
+    } catch (error) {
+      console.error("Token verification error:", error);
+      this.clearToken();
+      return false;
+    }
+  }
+
+  // Show authentication page
+  showAuthPage() {
+    this.hideAllPages();
+    document.getElementById("authPage").classList.add("active");
+    document.querySelector(".header").style.display = "none";
+    document.querySelector(".stats-dashboard").style.display = "none";
+  }
+
+  // Show main app
+  showMainApp() {
+    this.hideAllPages();
+    document.getElementById("homePage").classList.add("active");
+    document.querySelector(".header").style.display = "block";
+    document.querySelector(".stats-dashboard").style.display = "block";
+    this.updateUserDisplay();
+  }
+
+  // Authentication methods
+  async register(email, password) {
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.saveToken(data.token);
+        this.user = data.user;
+        this.stats.userStats = data.user.stats;
+        this.showMainApp();
+        await this.loadData();
+        this.renderHome();
+        this.updateStats();
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      return { success: false, message: "Network error. Please try again." };
+    }
+  }
+
+  async login(email, password) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.saveToken(data.token);
+        this.user = data.user;
+        this.stats.userStats = data.user.stats;
+        this.stats.currentStats = data.user.currentStats;
+        this.showMainApp();
+        await this.loadData();
+        this.renderHome();
+        this.updateStats();
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      return { success: false, message: "Network error. Please try again." };
+    }
+  }
+
+  logout() {
+    this.clearToken();
+    this.questions = [];
+    this.subjects = [];
+    this.stats = { currentStats: {}, userStats: {} };
+    this.resetFilters();
+    this.showAuthPage();
   }
 
   // Load all data from API
   async loadData() {
     try {
-      const [subjectsRes, questionsRes] = await Promise.all([
-        fetch("/api/subjects"),
-        fetch("/api/questions"),
+      const [subjectsRes, questionsRes, statsRes] = await Promise.all([
+        fetch("/api/subjects", { headers: this.getAuthHeaders() }),
+        fetch("/api/questions", { headers: this.getAuthHeaders() }),
+        fetch("/api/auth/stats", { headers: this.getAuthHeaders() }),
       ]);
 
-      this.subjects = await subjectsRes.json();
-      this.questions = await questionsRes.json();
+      if (subjectsRes.ok && questionsRes.ok && statsRes.ok) {
+        this.subjects = await subjectsRes.json();
+        this.questions = await questionsRes.json();
+        const statsData = await statsRes.json();
+        this.stats.userStats = statsData.stats;
+        this.stats.currentStats = statsData.currentStats;
+      } else {
+        // Handle auth errors
+        if (
+          subjectsRes.status === 401 ||
+          questionsRes.status === 401 ||
+          statsRes.status === 401
+        ) {
+          this.clearToken();
+          this.showAuthPage();
+          return;
+        }
+        throw new Error("Failed to load data");
+      }
     } catch (error) {
       console.error("Error loading data:", error);
+      if (this.token) {
+        this.clearToken();
+        this.showAuthPage();
+      }
     }
   }
 
-  // API Methods
+  // API Methods with authentication
+  async handleApiResponse(response) {
+    if (response.status === 401) {
+      this.clearToken();
+      this.showAuthPage();
+      throw new Error("Authentication required");
+    }
+    return response;
+  }
+
   async createSubject(data) {
     const response = await fetch("/api/subjects", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
 
+    await this.handleApiResponse(response);
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to create subject");
     }
+    return response.json();
+  }
 
+  async updateSubject(id, data) {
+    const response = await fetch(`/api/subjects/${id}`, {
+      method: "PUT",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update subject");
+    }
+    return response.json();
+  }
+
+  async deleteSubject(id) {
+    const response = await fetch(`/api/subjects/${id}`, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete subject");
+    }
     return response.json();
   }
 
   async addTopicToSubject(subjectId, topicName) {
     const response = await fetch(`/api/subjects/${subjectId}/topics`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ name: topicName }),
     });
 
+    await this.handleApiResponse(response);
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to create topic");
     }
+    return response.json();
+  }
 
+  async updateTopic(subjectId, oldTopicName, newTopicName) {
+    const response = await fetch(
+      `/api/subjects/${subjectId}/topics/${encodeURIComponent(oldTopicName)}`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ name: newTopicName }),
+      }
+    );
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update topic");
+    }
+    return response.json();
+  }
+
+  async deleteTopic(subjectId, topicName) {
+    const response = await fetch(
+      `/api/subjects/${subjectId}/topics/${encodeURIComponent(topicName)}`,
+      {
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete topic");
+    }
     return response.json();
   }
 
   async createQuestion(data) {
     const response = await fetch("/api/questions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
 
+    await this.handleApiResponse(response);
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to create question");
     }
-
     return response.json();
   }
 
   async updateQuestion(id, data) {
     const response = await fetch(`/api/questions/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update question");
+    }
+    return response.json();
+  }
+
+  async deleteQuestion(id) {
+    const response = await fetch(`/api/questions/${id}`, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to delete question");
+    }
     return response.json();
   }
 
   async rateQuestion(id, rating) {
     const response = await fetch(`/api/questions/${id}/rate`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ rating }),
     });
+
+    await this.handleApiResponse(response);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to rate question");
+    }
     return response.json();
   }
 
-  // Load stats from localStorage
-  loadStats() {
-    const saved = localStorage.getItem("questRecallStats");
-    if (saved) {
-      const stats = JSON.parse(saved);
-      if (stats.lastStudyDate) {
-        stats.lastStudyDate = new Date(stats.lastStudyDate);
-      }
-      if (!stats.dailyAttempts) stats.dailyAttempts = {};
-      if (!stats.ratingCounts)
-        stats.ratingCounts = { again: 0, hard: 0, medium: 0, easy: 0 };
-      if (typeof stats.streak === "undefined") stats.streak = 0;
-      if (typeof stats.totalAnswers === "undefined") stats.totalAnswers = 0;
-      return stats;
-    }
-    return {
-      streak: 0,
-      totalAnswers: 0,
-      lastStudyDate: null,
-      dailyAttempts: {},
-      ratingCounts: { again: 0, hard: 0, medium: 0, easy: 0 },
-    };
+  // Utility methods
+  resetFilters() {
+    this.currentFilter = { subjectId: null, topicNames: [] };
+    this.selectedTopics.clear();
+    this.currentSubjectId = null;
+    this.showingImportant = false;
+    this.resetRandomization();
   }
 
-  // Save stats to localStorage
-  saveStats() {
-    localStorage.setItem("questRecallStats", JSON.stringify(this.stats));
+  resetRandomization() {
+    this.isRandomized = false;
+    this.randomizedOrder = [];
+    const randomizeBtn = document.getElementById("randomizeBtn");
+    if (randomizeBtn) {
+      randomizeBtn.textContent = "🎲 Randomize";
+      randomizeBtn.classList.remove("active");
+    }
+  }
+
+  shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
 
   // Get filtered questions
   getFilteredQuestions() {
-    const filtered = this.questions.filter((q) => {
+    return this.questions.filter((q) => {
       if (
         this.currentFilter.subjectId &&
         q.subject._id !== this.currentFilter.subjectId
@@ -151,18 +418,8 @@ class QuestRecallApp {
       }
       return true;
     });
-
-    console.log("Current filter:", this.currentFilter);
-    console.log(
-      "Filtered questions:",
-      filtered.length,
-      "out of",
-      this.questions.length
-    );
-    return filtered;
   }
 
-  // Get due questions
   getDueQuestions() {
     const now = new Date();
     return this.getFilteredQuestions().filter((q) => {
@@ -170,56 +427,95 @@ class QuestRecallApp {
     });
   }
 
-  // Get important questions
   getImportantQuestions() {
     return this.getFilteredQuestions().filter((q) => q.important);
   }
 
-  // Update statistics
+  // Update statistics display
   updateStats() {
-    const now = new Date();
-    const today = now.toDateString();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toDateString();
+    if (!this.stats.currentStats) return;
 
-    if (!this.stats.dailyAttempts[today]) {
-      this.stats.dailyAttempts[today] = 0;
-    }
-
-    const cardsDueToday = this.getDueQuestions().length;
-    const dueQuestionsOverall = this.getDueQuestions().length;
-    const todayAttempts = this.stats.dailyAttempts[today] || 0;
-    const yesterdayAttempts = this.stats.dailyAttempts[yesterdayStr] || 0;
-    const progressVsYesterday = todayAttempts - yesterdayAttempts;
-
-    const { again, hard, medium, easy } = this.stats.ratingCounts;
-    const retentionRate =
-      this.stats.totalAnswers > 0
-        ? Math.round(
-            ((medium + easy - hard - again) / this.stats.totalAnswers) * 100
-          )
-        : 0;
+    const { dueToday, dueOverall, retention, progress } =
+      this.stats.currentStats;
 
     const cardsDueTodayEl = document.getElementById("cardsDueToday");
     const dueOverallEl = document.getElementById("dueOverall");
     const retentionEl = document.getElementById("retention");
     const progressEl = document.getElementById("progress");
 
-    if (cardsDueTodayEl) cardsDueTodayEl.textContent = cardsDueToday;
-    if (dueOverallEl) dueOverallEl.textContent = dueQuestionsOverall;
-    if (retentionEl) retentionEl.textContent = retentionRate + "%";
+    if (cardsDueTodayEl) cardsDueTodayEl.textContent = dueToday || 0;
+    if (dueOverallEl) dueOverallEl.textContent = dueOverall || 0;
+    if (retentionEl) retentionEl.textContent = (retention || 0) + "%";
     if (progressEl) {
+      const progressValue = progress || 0;
       progressEl.textContent =
-        progressVsYesterday >= 0
-          ? "+" + progressVsYesterday
-          : progressVsYesterday.toString();
+        progressValue >= 0 ? "+" + progressValue : progressValue.toString();
     }
-
-    this.saveStats();
   }
 
-  // Render home page
+  updateUserDisplay() {
+    const userEmailEl = document.getElementById("userEmail");
+    if (userEmailEl && this.user) {
+      userEmailEl.textContent = this.user.email;
+    }
+  }
+
+  // Page navigation methods
+  hideAllPages() {
+    document.querySelectorAll(".page").forEach((page) => {
+      page.classList.remove("active");
+    });
+  }
+
+  showHomePage() {
+    this.showingImportant = false;
+    this.hideAllPages();
+    document.getElementById("homePage").classList.add("active");
+  }
+
+  showSubjectsPage() {
+    this.hideAllPages();
+    document.getElementById("subjectPage").classList.add("active");
+    this.renderSubjects();
+  }
+
+  showTopicsPage(subjectId) {
+    this.hideAllPages();
+    document.getElementById("topicPage").classList.add("active");
+    this.currentSubjectId = subjectId;
+
+    const subject = this.subjects.find((s) => s._id === subjectId);
+    if (subject) {
+      const currentSubjectName = document.getElementById("currentSubjectName");
+      if (currentSubjectName) {
+        currentSubjectName.textContent = subject.name;
+      }
+    }
+
+    this.renderTopics(subjectId);
+  }
+
+  showImportantPage() {
+    if (this.showingImportant) {
+      this.showingImportant = false;
+      this.showHomePage();
+      this.renderHome();
+    } else {
+      this.showingImportant = true;
+      this.hideAllPages();
+      document.getElementById("importantPage").classList.add("active");
+      this.renderImportantQuestions();
+    }
+  }
+
+  clearSubjectFilter() {
+    this.resetFilters();
+    this.showHomePage();
+    this.renderHome();
+    this.updateStats();
+  }
+
+  // Render methods
   renderHome() {
     const container = document.getElementById("questionsContainer");
     const noQuestions = document.getElementById("noQuestions");
@@ -228,6 +524,7 @@ class QuestRecallApp {
 
     this.hideAllPages();
     document.getElementById("homePage").classList.add("active");
+    this.updateUserDisplay();
 
     if (
       this.currentFilter.topicNames.length > 0 &&
@@ -258,23 +555,22 @@ class QuestRecallApp {
 
     const dueQuestions = this.getDueQuestions();
 
-    // Clear container first
     if (container) container.innerHTML = "";
 
-    // Always add "Create New Question" card as first card
+    // Add "Create New Question" card
     const createCard = document.createElement("div");
     createCard.className = "question-card create-card";
     createCard.innerHTML = `
-    <div class="question-header">
-      <span class="subject-badge">Create</span>
-    </div>
-    <div class="question-text">➕ Create New Question</div>
-    <div class="create-question-info">Add a new question to practice</div>
-  `;
+      <div class="question-header">
+        <span class="subject-badge">Create</span>
+      </div>
+      <div class="question-text">➕ Create New Question</div>
+      <div class="create-question-info">Add a new question to practice</div>
+    `;
     createCard.addEventListener("click", () => this.showCreateQuestion());
     if (container) container.appendChild(createCard);
 
-    // Handle no questions case - add a card instead of showing the separate no-questions section
+    // Handle no questions case
     if (dueQuestions.length === 0) {
       const allFilteredQuestions = this.getFilteredQuestions();
       const practiceMoreCount = allFilteredQuestions.length;
@@ -282,23 +578,22 @@ class QuestRecallApp {
       const noQuestionsCard = document.createElement("div");
       noQuestionsCard.className = "question-card no-questions-card";
       noQuestionsCard.innerHTML = `
-      <div class="question-header">
-        <span class="subject-badge">Status</span>
-      </div>
-      <div class="question-text">🎉 All Done for Today!</div>
-      <div class="create-question-info">You've completed all your due cards. Great work!</div>
-      ${
-        practiceMoreCount > 0
-          ? `
-        <button class="practice-more-btn btn btn--outline btn--sm">
-          Practice More (${practiceMoreCount} questions)
-        </button>
-      `
-          : ""
-      }
-    `;
+        <div class="question-header">
+          <span class="subject-badge">Status</span>
+        </div>
+        <div class="question-text">🎉 All Done for Today!</div>
+        <div class="create-question-info">You've completed all your due cards. Great work!</div>
+        ${
+          practiceMoreCount > 0
+            ? `
+          <button class="practice-more-btn btn btn--outline btn--sm">
+            Practice More (${practiceMoreCount} questions)
+          </button>
+        `
+            : ""
+        }
+      `;
 
-      // Add click handler for practice more button
       if (practiceMoreCount > 0) {
         const practiceBtn = noQuestionsCard.querySelector(".practice-more-btn");
         if (practiceBtn) {
@@ -310,7 +605,6 @@ class QuestRecallApp {
       }
 
       if (container) container.appendChild(noQuestionsCard);
-
       if (noQuestions) noQuestions.classList.add("hidden");
       return;
     }
@@ -326,12 +620,7 @@ class QuestRecallApp {
     }
 
     // Group questions by rating
-    const questionGroups = {
-      again: [],
-      hard: [],
-      medium: [],
-      easy: [],
-    };
+    const questionGroups = { again: [], hard: [], medium: [], easy: [] };
 
     questionsToRender.forEach((q) => {
       const rating = q.rating || "again";
@@ -363,106 +652,6 @@ class QuestRecallApp {
     });
   }
 
-  // Show practice more questions (all filtered questions regardless of due date)
-  showPracticeMoreQuestions() {
-    const container = document.getElementById("questionsContainer");
-    const noQuestions = document.getElementById("noQuestions");
-
-    if (container) container.innerHTML = "";
-    if (noQuestions) noQuestions.classList.add("hidden");
-
-    // Always add "Create New Question" card as first card
-    const createCard = document.createElement("div");
-    createCard.className = "question-card create-card";
-    createCard.innerHTML = `
-    <div class="question-header">
-      <span class="subject-badge">Create</span>
-    </div>
-    <div class="question-text">➕ Create New Question</div>
-    <div class="create-question-info">Add a new question to practice</div>
-  `;
-    createCard.addEventListener("click", () => this.showCreateQuestion());
-    if (container) container.appendChild(createCard);
-
-    // Get all filtered questions (not just due ones)
-    const allQuestions = this.getFilteredQuestions();
-
-    if (allQuestions.length === 0) {
-      const noQuestionsCard = document.createElement("div");
-      noQuestionsCard.className = "question-card no-questions-card";
-      noQuestionsCard.innerHTML = `
-      <div class="question-header">
-        <span class="subject-badge">Status</span>
-      </div>
-      <div class="question-text">📝 No Questions Yet</div>
-      <div class="create-question-info">Create your first question to start practicing!</div>
-    `;
-      if (container) container.appendChild(noQuestionsCard);
-      return;
-    }
-
-    // Add a "Practice More" indicator card
-    const practiceMoreCard = document.createElement("div");
-    practiceMoreCard.className = "question-card practice-more-info-card";
-    practiceMoreCard.innerHTML = `
-    <div class="question-header">
-      <span class="subject-badge">Practice Mode</span>
-      <button class="back-to-due-btn btn btn--outline btn--sm" title="Back to Due Questions">
-        🎯 Due Only
-      </button>
-    </div>
-    <div class="question-text">📚 Practice Mode Active</div>
-    <div class="create-question-info">Showing all questions including completed ones</div>
-  `;
-
-    // Add click handler for back to due questions
-    const backBtn = practiceMoreCard.querySelector(".back-to-due-btn");
-    if (backBtn) {
-      backBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.renderHome(); // Go back to normal due questions view
-      });
-    }
-
-    if (container) container.appendChild(practiceMoreCard);
-
-    // Group questions by rating
-    const questionGroups = {
-      again: [],
-      hard: [],
-      medium: [],
-      easy: [],
-    };
-
-    allQuestions.forEach((q) => {
-      const rating = q.rating || "again";
-      if (questionGroups[rating]) {
-        questionGroups[rating].push(q);
-      }
-    });
-
-    // Sort by importance within each group
-    Object.keys(questionGroups).forEach((rating) => {
-      questionGroups[rating].sort((a, b) => {
-        if (a.important && !b.important) return -1;
-        if (!a.important && b.important) return 1;
-        return 0;
-      });
-    });
-
-    // Render questions by rating priority
-    const ratingOrder = ["again", "hard", "medium", "easy"];
-    ratingOrder.forEach((rating) => {
-      if (questionGroups[rating].length > 0) {
-        questionGroups[rating].forEach((question) => {
-          const card = this.createQuestionCard(question);
-          if (container) container.appendChild(card);
-        });
-      }
-    });
-  }
-
-  // Create question card element
   createQuestionCard(question) {
     const card = document.createElement("div");
     const rating = question.rating || "again";
@@ -472,10 +661,22 @@ class QuestRecallApp {
     card.innerHTML = `
       <div class="question-header">
         <span class="subject-badge">${question.subjectName}</span>
-        <button class="star-btn ${question.important ? "important" : ""}" 
-                data-question-id="${question._id}">
-          ${question.important ? "🌟" : "⭐"}
-        </button>
+        <div class="question-actions">
+          <button class="star-btn ${question.important ? "important" : ""}" 
+                  data-question-id="${question._id}">
+            ${question.important ? "🌟" : "⭐"}
+          </button>
+          <button class="edit-btn" data-question-id="${
+            question._id
+          }" title="Edit Question">
+            ✏️
+          </button>
+          <button class="delete-btn" data-question-id="${
+            question._id
+          }" title="Delete Question">
+            🗑️
+          </button>
+        </div>
       </div>
       <div class="question-text">${question.text}</div>
       <div class="rating-buttons">
@@ -500,28 +701,13 @@ class QuestRecallApp {
     return card;
   }
 
-  // Hide all pages
-  hideAllPages() {
-    document.querySelectorAll(".page").forEach((page) => {
-      page.classList.remove("active");
-    });
-  }
-
-  // Show subjects page
-  showSubjectsPage() {
-    this.hideAllPages();
-    document.getElementById("subjectPage").classList.add("active");
-    this.renderSubjects();
-  }
-
-  // Render subjects
   renderSubjects() {
     const container = document.getElementById("subjectsGrid");
     if (!container) return;
 
     container.innerHTML = "";
 
-    // Add "Create New Subject" card as first card
+    // Add "Create New Subject" card
     const createCard = document.createElement("div");
     createCard.className = "subject-card create-card";
     createCard.innerHTML = `
@@ -559,31 +745,28 @@ class QuestRecallApp {
         <div class="subject-icon">${subject.icon}</div>
         <div class="subject-name">${subject.name}</div>
         <div class="subject-count">${dueCount} due / ${subjectQuestions.length} total</div>
+        <div class="subject-actions">
+          <button class="edit-btn subject-edit-btn" data-subject-id="${subject._id}" title="Edit Subject">
+            ✏️
+          </button>
+          <button class="delete-btn subject-delete-btn" data-subject-id="${subject._id}" title="Delete Subject">
+            🗑️
+          </button>
+        </div>
       `;
 
-      card.addEventListener("click", () => this.showTopicsPage(subject._id));
+      card.addEventListener("click", (e) => {
+        if (
+          !e.target.classList.contains("edit-btn") &&
+          !e.target.classList.contains("delete-btn")
+        ) {
+          this.showTopicsPage(subject._id);
+        }
+      });
       container.appendChild(card);
     });
   }
 
-  // Show topics page
-  showTopicsPage(subjectId) {
-    this.hideAllPages();
-    document.getElementById("topicPage").classList.add("active");
-    this.currentSubjectId = subjectId;
-
-    const subject = this.subjects.find((s) => s._id === subjectId);
-    if (subject) {
-      const currentSubjectName = document.getElementById("currentSubjectName");
-      if (currentSubjectName) {
-        currentSubjectName.textContent = subject.name;
-      }
-    }
-
-    this.renderTopics(subjectId);
-  }
-
-  // Render topics - SIMPLIFIED: Single topic selection
   renderTopics(subjectId) {
     const container = document.getElementById("topicsGrid");
     if (!container) return;
@@ -593,7 +776,7 @@ class QuestRecallApp {
     const subject = this.subjects.find((s) => s._id === subjectId);
     if (!subject) return;
 
-    // Add "Create New Topic" card as first card
+    // Add "Create New Topic" card
     const createCard = document.createElement("div");
     createCard.className = "subject-card create-card";
     createCard.innerHTML = `
@@ -641,15 +824,28 @@ class QuestRecallApp {
           <div class="subject-icon">${subject.icon}</div>
           <div class="subject-name">${topic.name}</div>
           <div class="subject-count">${dueCount} due / ${topicQuestions.length} total</div>
+          <div class="topic-actions">
+            <button class="edit-btn topic-edit-btn" data-topic-name="${topic.name}" title="Edit Topic">
+              ✏️
+            </button>
+            <button class="delete-btn topic-delete-btn" data-topic-name="${topic.name}" title="Delete Topic">
+              🗑️
+            </button>
+          </div>
         `;
 
-        card.addEventListener("click", () => {
-          this.currentFilter.subjectId = subjectId;
-          this.currentFilter.topicNames = [topic.name];
-          this.resetRandomization();
-          this.showHomePage();
-          this.renderHome();
-          this.updateStats();
+        card.addEventListener("click", (e) => {
+          if (
+            !e.target.classList.contains("edit-btn") &&
+            !e.target.classList.contains("delete-btn")
+          ) {
+            this.currentFilter.subjectId = subjectId;
+            this.currentFilter.topicNames = [topic.name];
+            this.resetRandomization();
+            this.showHomePage();
+            this.renderHome();
+            this.updateStats();
+          }
         });
 
         container.appendChild(card);
@@ -657,48 +853,42 @@ class QuestRecallApp {
     }
   }
 
-  // Helper method to get subject question count
   getSubjectQuestionCount(subjectId) {
     return this.questions.filter((q) => q.subject._id === subjectId).length;
   }
 
-  // Clear subject filter - FIXED: Always show all questions when going back to home
-  clearSubjectFilter() {
-    this.currentFilter = { subjectId: null, topicNames: [] };
-    this.selectedTopics.clear();
-    this.currentSubjectId = null;
-    this.showingImportant = false; // Reset important view
-    this.resetRandomization();
-    this.showHomePage();
-    this.renderHome();
-    this.updateStats();
-  }
+  renderImportantQuestions() {
+    const container = document.getElementById("importantQuestionsContainer");
+    const noQuestions = document.getElementById("noImportantQuestions");
 
-  // Show home page - FIXED: Reset important view when going home
-  showHomePage() {
-    this.showingImportant = false; // Always reset when going to home
-    this.hideAllPages();
-    document.getElementById("homePage").classList.add("active");
-  }
+    let importantQuestions = this.getImportantQuestions();
 
-  // Reset randomization
-  resetRandomization() {
-    this.isRandomized = false;
-    this.randomizedOrder = [];
-    const randomizeBtn = document.getElementById("randomizeBtn");
-    if (randomizeBtn) {
-      randomizeBtn.textContent = "🎲 Randomize";
-      randomizeBtn.classList.remove("active");
+    if (importantQuestions.length === 0) {
+      if (container) container.innerHTML = "";
+      if (noQuestions) noQuestions.classList.remove("hidden");
+      return;
     }
+
+    if (this.isRandomized && this.randomizedOrder.length > 0) {
+      importantQuestions = this.randomizedOrder
+        .map((id) => importantQuestions.find((q) => q._id === id))
+        .filter((q) => q !== undefined);
+    }
+
+    if (noQuestions) noQuestions.classList.add("hidden");
+    if (container) container.innerHTML = "";
+
+    importantQuestions.forEach((question) => {
+      const card = this.createQuestionCard(question);
+      if (container) container.appendChild(card);
+    });
   }
 
-  // FIXED: Toggle randomization functionality
   toggleRandomization() {
     this.isRandomized = !this.isRandomized;
     const btn = document.getElementById("randomizeBtn");
 
     if (this.isRandomized) {
-      // Create new randomized order
       const currentQuestions = this.showingImportant
         ? this.getImportantQuestions()
         : this.getDueQuestions();
@@ -710,7 +900,6 @@ class QuestRecallApp {
         btn.classList.add("active");
       }
     } else {
-      // Reset to original order
       this.randomizedOrder = [];
       if (btn) {
         btn.textContent = "🎲 Randomize";
@@ -718,7 +907,6 @@ class QuestRecallApp {
       }
     }
 
-    // Re-render current view
     if (this.showingImportant) {
       this.renderImportantQuestions();
     } else {
@@ -726,32 +914,12 @@ class QuestRecallApp {
     }
   }
 
-  // Shuffle array utility
-  shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
-  // Rate question and update stats
+  // Event handlers
   async handleRateQuestion(questionId, rating) {
     try {
       await this.rateQuestion(questionId, rating);
-
-      // Update local data
       await this.loadData();
 
-      // Update statistics
-      const today = new Date().toDateString();
-      if (!this.stats.dailyAttempts[today]) {
-        this.stats.dailyAttempts[today] = 0;
-      }
-      this.stats.dailyAttempts[today]++;
-      this.stats.ratingCounts[rating]++;
-      this.stats.totalAnswers++;
-
-      // Animate card out
       const card = document.querySelector(`[data-question-id="${questionId}"]`);
       if (card && card.classList.contains("question-card")) {
         card.classList.add("animating-out");
@@ -771,14 +939,15 @@ class QuestRecallApp {
         }
         this.updateStats();
       }
-
-      this.saveStats();
     } catch (error) {
       console.error("Error rating question:", error);
+      if (error.message === "Authentication required") {
+        return;
+      }
+      alert("Error rating question: " + error.message);
     }
   }
 
-  // Toggle important status
   async toggleImportant(questionId) {
     try {
       const question = this.questions.find((q) => q._id === questionId);
@@ -788,7 +957,6 @@ class QuestRecallApp {
         });
         await this.loadData();
 
-        // Update star button immediately
         const starBtns = document.querySelectorAll(
           `[data-question-id="${questionId}"].star-btn`
         );
@@ -808,52 +976,11 @@ class QuestRecallApp {
       }
     } catch (error) {
       console.error("Error toggling important:", error);
+      if (error.message === "Authentication required") {
+        return;
+      }
+      alert("Error updating question: " + error.message);
     }
-  }
-
-  // Show important questions page - FIXED: Toggle between important and all questions
-  showImportantPage() {
-    if (this.showingImportant) {
-      // If already showing important, go back to all questions
-      this.showingImportant = false;
-      this.showHomePage();
-      this.renderHome();
-    } else {
-      // Show important questions
-      this.showingImportant = true;
-      this.hideAllPages();
-      document.getElementById("importantPage").classList.add("active");
-      this.renderImportantQuestions();
-    }
-  }
-
-  // Render important questions - FIXED: Support randomization
-  renderImportantQuestions() {
-    const container = document.getElementById("importantQuestionsContainer");
-    const noQuestions = document.getElementById("noImportantQuestions");
-
-    let importantQuestions = this.getImportantQuestions();
-
-    if (importantQuestions.length === 0) {
-      if (container) container.innerHTML = "";
-      if (noQuestions) noQuestions.classList.remove("hidden");
-      return;
-    }
-
-    // Apply randomization if enabled
-    if (this.isRandomized && this.randomizedOrder.length > 0) {
-      importantQuestions = this.randomizedOrder
-        .map((id) => importantQuestions.find((q) => q._id === id))
-        .filter((q) => q !== undefined);
-    }
-
-    if (noQuestions) noQuestions.classList.add("hidden");
-    if (container) container.innerHTML = "";
-
-    importantQuestions.forEach((question) => {
-      const card = this.createQuestionCard(question);
-      if (container) container.appendChild(card);
-    });
   }
 
   // Modal methods
@@ -865,232 +992,274 @@ class QuestRecallApp {
     document.getElementById(modalId).classList.add("hidden");
   }
 
-  // Subject creation
+  // Create/Edit Subject
   showCreateSubject() {
+    this.editingSubject = null;
     document.getElementById("subjectModalTitle").textContent =
       "Create New Subject";
-    document.getElementById("subjectForm").reset();
+    document.getElementById("subjectId").value = "";
+    document.getElementById("subjectName").value = "";
+    document.getElementById("subjectIcon").value = "";
+    document.getElementById("subjectColor").value = "#218085";
+    document.getElementById("deleteSubjectBtn").classList.add("hidden");
     this.showModal("subjectModal");
   }
 
-  async handleSubjectSubmit(e) {
-    e.preventDefault();
-    console.log("Subject form submitted");
+  showEditSubject(subjectId) {
+    const subject = this.subjects.find((s) => s._id === subjectId);
+    if (!subject) return;
 
-    const data = {
-      name: document.getElementById("subjectName").value,
-      icon: document.getElementById("subjectIcon").value,
-      color: document.getElementById("subjectColor").value,
-      topics: [],
-    };
-
-    console.log("Subject data:", data);
-
-    try {
-      const result = await this.createSubject(data);
-      console.log("Subject created:", result);
-      await this.loadData();
-      this.hideModal("subjectModal");
-      this.renderSubjects();
-    } catch (error) {
-      console.error("Error creating subject:", error);
-      alert("Error creating subject: " + error.message);
-    }
+    this.editingSubject = subject;
+    document.getElementById("subjectModalTitle").textContent = "Edit Subject";
+    document.getElementById("subjectId").value = subject._id;
+    document.getElementById("subjectName").value = subject.name;
+    document.getElementById("subjectIcon").value = subject.icon;
+    document.getElementById("subjectColor").value = subject.color || "#218085";
+    document.getElementById("deleteSubjectBtn").classList.remove("hidden");
+    this.showModal("subjectModal");
   }
 
-  // Topic creation
+  // Create/Edit Topic
   showCreateTopic() {
-    if (!this.currentSubjectId) {
-      alert("Please select a subject first");
-      return;
-    }
-
+    this.editingTopic = null;
     document.getElementById("topicModalTitle").textContent = "Create New Topic";
-    document.getElementById("topicForm").reset();
+    document.getElementById("topicSubjectId").value = this.currentSubjectId;
+    document.getElementById("originalTopicName").value = "";
+    document.getElementById("topicName").value = "";
+    document.getElementById("deleteTopicBtn").classList.add("hidden");
     this.showModal("topicModal");
   }
 
-  async handleTopicSubmit(e) {
-    e.preventDefault();
-    console.log("Topic form submitted");
-
-    const topicName = document.getElementById("topicName").value;
-    console.log("Topic name:", topicName, "Subject ID:", this.currentSubjectId);
-
-    try {
-      const result = await this.addTopicToSubject(
-        this.currentSubjectId,
-        topicName
-      );
-      console.log("Topic created:", result);
-      await this.loadData();
-      this.hideModal("topicModal");
-      this.renderTopics(this.currentSubjectId);
-    } catch (error) {
-      console.error("Error creating topic:", error);
-      if (error.message && error.message.includes("already exists")) {
-        alert("Topic already exists in this subject");
-      } else {
-        alert("Error creating topic: " + error.message);
-      }
-    }
+  showEditTopic(topicName) {
+    this.editingTopic = topicName;
+    document.getElementById("topicModalTitle").textContent = "Edit Topic";
+    document.getElementById("topicSubjectId").value = this.currentSubjectId;
+    document.getElementById("originalTopicName").value = topicName;
+    document.getElementById("topicName").value = topicName;
+    document.getElementById("deleteTopicBtn").classList.remove("hidden");
+    this.showModal("topicModal");
   }
 
-  // Question creation submit handler
-  async handleQuestionSubmit(e) {
-    e.preventDefault();
-    console.log("Question form submitted");
-
-    const data = {
-      text: document.getElementById("questionText").value,
-      subject: document.getElementById("questionSubject").value,
-      topicName: document.getElementById("questionTopic").value,
-    };
-
-    console.log("Question data:", data);
-
-    try {
-      const result = await this.createQuestion(data);
-      console.log("Question created:", result);
-      await this.loadData();
-      this.hideModal("questionModal");
-
-      // Refresh current view
-      if (this.showingImportant) {
-        this.renderImportantQuestions();
-      } else {
-        this.renderHome();
-      }
-      this.updateStats();
-    } catch (error) {
-      console.error("Error creating question:", error);
-      alert("Error creating question: " + error.message);
-    }
-  }
-
-  // Question creation
+  // Create/Edit Question
   showCreateQuestion() {
+    this.editingQuestion = null;
     document.getElementById("questionModalTitle").textContent =
       "Create New Question";
-    document.getElementById("questionForm").reset();
-    this.populateQuestionSubjects();
+    document.getElementById("questionId").value = "";
+    document.getElementById("questionText").value = "";
+    document.getElementById("deleteQuestionBtn").classList.add("hidden");
+    this.populateSubjectDropdown();
+    this.showModal("questionModal");
+  }
 
-    // Auto-select current subject if available
-    if (this.currentFilter.subjectId) {
-      document.getElementById("questionSubject").value =
-        this.currentFilter.subjectId;
-      this.updateQuestionTopics(this.currentFilter.subjectId);
+  showEditQuestion(questionId) {
+    const question = this.questions.find((q) => q._id === questionId);
+    if (!question) return;
 
-      // Auto-select topic if only one is selected
-      if (this.currentFilter.topicNames.length === 1) {
-        setTimeout(() => {
-          document.getElementById("questionTopic").value =
-            this.currentFilter.topicNames[0];
-        }, 100);
-      }
-    }
+    this.editingQuestion = question;
+    document.getElementById("questionModalTitle").textContent = "Edit Question";
+    document.getElementById("questionId").value = question._id;
+    document.getElementById("questionText").value = question.text;
+    document.getElementById("deleteQuestionBtn").classList.remove("hidden");
+    this.populateSubjectDropdown();
+
+    // Set subject and topic
+    setTimeout(() => {
+      document.getElementById("questionSubject").value = question.subject._id;
+      this.populateTopicDropdown(question.subject._id);
+      setTimeout(() => {
+        document.getElementById("questionTopic").value = question.topicName;
+      }, 100);
+    }, 100);
 
     this.showModal("questionModal");
   }
 
-  populateQuestionSubjects() {
+  populateSubjectDropdown() {
     const select = document.getElementById("questionSubject");
-    while (select.children.length > 1) {
-      select.removeChild(select.lastChild);
-    }
+    select.innerHTML =
+      '<option value="" disabled selected>Choose a subject</option>';
 
     this.subjects.forEach((subject) => {
-      const option = new Option(subject.name, subject._id);
+      const option = document.createElement("option");
+      option.value = subject._id;
+      option.textContent = subject.name;
       select.appendChild(option);
     });
+
+    // Pre-select current subject if available
+    if (this.currentSubjectId) {
+      select.value = this.currentSubjectId;
+      this.populateTopicDropdown(this.currentSubjectId);
+    }
   }
 
-  async updateQuestionTopics(subjectId) {
+  populateTopicDropdown(subjectId) {
     const select = document.getElementById("questionTopic");
-    while (select.children.length > 1) {
-      select.removeChild(select.lastChild);
-    }
+    select.innerHTML =
+      '<option value="" disabled selected>Choose a topic</option>';
+
+    if (!subjectId) return;
 
     const subject = this.subjects.find((s) => s._id === subjectId);
     if (subject && subject.topics) {
       subject.topics.forEach((topic) => {
-        const option = new Option(topic.name, topic.name);
+        const option = document.createElement("option");
+        option.value = topic.name;
+        option.textContent = topic.name;
         select.appendChild(option);
       });
     }
   }
 
-  async handleQuestionSubmit(e) {
-    e.preventDefault();
-    console.log("Question form submitted");
+  showPracticeMoreQuestions() {
+    const allQuestions = this.getFilteredQuestions();
+    if (allQuestions.length === 0) return;
 
-    const data = {
-      text: document.getElementById("questionText").value,
-      subject: document.getElementById("questionSubject").value,
-      topicName: document.getElementById("questionTopic").value,
-    };
+    // Temporarily show all questions for practice
+    const container = document.getElementById("questionsContainer");
+    if (!container) return;
 
-    console.log("Question data:", data);
+    // Clear existing content
+    container.innerHTML = "";
 
-    try {
-      const result = await this.createQuestion(data);
-      console.log("Question created:", result);
-      await this.loadData();
-      this.hideModal("questionModal");
-      this.renderHome();
-      this.updateStats();
-    } catch (error) {
-      console.error("Error creating question:", error);
-      alert("Error creating question: " + error.message);
-    }
+    // Add "Create New Question" card
+    const createCard = document.createElement("div");
+    createCard.className = "question-card create-card";
+    createCard.innerHTML = `
+      <div class="question-header">
+        <span class="subject-badge">Create</span>
+      </div>
+      <div class="question-text">➕ Create New Question</div>
+      <div class="create-question-info">Add a new question to practice</div>
+    `;
+    createCard.addEventListener("click", () => this.showCreateQuestion());
+    container.appendChild(createCard);
+
+    // Show all questions for practice
+    allQuestions.forEach((question) => {
+      const card = this.createQuestionCard(question);
+      container.appendChild(card);
+    });
   }
 
-  // Bind event handlers
+  // Confirmation modal
+  showConfirmation(title, message, onConfirm) {
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMessage").textContent = message;
+
+    const confirmBtn = document.getElementById("confirmAction");
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    newConfirmBtn.addEventListener("click", () => {
+      this.hideModal("confirmModal");
+      onConfirm();
+    });
+
+    this.showModal("confirmModal");
+  }
+
+  // Event binding
   bindEvents() {
+    // Auth tab switching
+    document.getElementById("loginTab")?.addEventListener("click", () => {
+      document.getElementById("loginTab").classList.add("active");
+      document.getElementById("registerTab").classList.remove("active");
+      document.getElementById("loginForm").classList.add("active");
+      document.getElementById("registerForm").classList.remove("active");
+    });
+
+    document.getElementById("registerTab")?.addEventListener("click", () => {
+      document.getElementById("registerTab").classList.add("active");
+      document.getElementById("loginTab").classList.remove("active");
+      document.getElementById("registerForm").classList.add("active");
+      document.getElementById("loginForm").classList.remove("active");
+    });
+
+    // Auth forms
+    document
+      .getElementById("loginFormElement")
+      ?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+
+        const result = await this.login(email, password);
+        this.showAuthMessage(
+          result.message,
+          result.success ? "success" : "error"
+        );
+      });
+
+    document
+      .getElementById("registerFormElement")
+      ?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("registerEmail").value;
+        const password = document.getElementById("registerPassword").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+          this.showAuthMessage("Passwords do not match", "error");
+          return;
+        }
+
+        const result = await this.register(email, password);
+        this.showAuthMessage(
+          result.message,
+          result.success ? "success" : "error"
+        );
+      });
+
     // Header buttons
-    document
-      .getElementById("subjectBtn")
-      ?.addEventListener("click", () => this.showSubjectsPage());
-    document
-      .getElementById("importantBtn")
-      ?.addEventListener("click", () => this.showImportantPage());
-    document
-      .getElementById("randomizeBtn")
-      ?.addEventListener("click", () => this.toggleRandomization());
     document.getElementById("appLogo")?.addEventListener("click", () => {
       this.clearSubjectFilter();
-      this.renderHome();
+    });
+
+    document.getElementById("randomizeBtn")?.addEventListener("click", () => {
+      this.toggleRandomization();
+    });
+
+    document.getElementById("importantBtn")?.addEventListener("click", () => {
+      this.showImportantPage();
+    });
+
+    document.getElementById("subjectBtn")?.addEventListener("click", () => {
+      this.showSubjectsPage();
+    });
+
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+      this.logout();
     });
 
     // Navigation buttons
     document.getElementById("backToHome")?.addEventListener("click", () => {
-      this.showHomePage();
-      this.renderHome();
+      this.clearSubjectFilter();
     });
-    document
-      .getElementById("backToSubjects")
-      ?.addEventListener("click", () => this.showSubjectsPage());
+
+    document.getElementById("backToSubjects")?.addEventListener("click", () => {
+      this.showSubjectsPage();
+    });
+
     document.getElementById("backToTopics")?.addEventListener("click", () => {
-      if (this.currentFilter.subjectId) {
-        this.currentFilter.topicNames = [];
-        this.selectedTopics.clear();
-        this.showTopicsPage(this.currentFilter.subjectId);
+      if (this.currentSubjectId) {
+        this.showTopicsPage(this.currentSubjectId);
       }
     });
+
     document
       .getElementById("backToHomeFromImportant")
       ?.addEventListener("click", () => {
-        this.showingImportant = false;
-        this.showHomePage();
-        this.renderHome();
+        this.clearSubjectFilter();
       });
 
-    // Question subject change for topic population
-    document
-      .getElementById("questionSubject")
-      ?.addEventListener("change", (e) => {
-        this.updateQuestionTopics(e.target.value);
-      });
+    document.getElementById("editSubjectBtn")?.addEventListener("click", () => {
+      if (this.currentSubjectId) {
+        this.showEditSubject(this.currentSubjectId);
+      }
+    });
 
     // Modal events
     document.querySelectorAll(".modal-close, .modal-cancel").forEach((btn) => {
@@ -1102,39 +1271,332 @@ class QuestRecallApp {
       });
     });
 
-    // Form submissions
+    // Click outside modal to close
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          this.hideModal(modal.id);
+        }
+      });
+    });
+
+    // Subject form
     document
       .getElementById("subjectForm")
-      ?.addEventListener("submit", (e) => this.handleSubjectSubmit(e));
+      ?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await this.handleSubjectSubmit();
+      });
+
+    // Topic form
     document
       .getElementById("topicForm")
-      ?.addEventListener("submit", (e) => this.handleTopicSubmit(e));
+      ?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await this.handleTopicSubmit();
+      });
+
+    // Question form
     document
       .getElementById("questionForm")
-      ?.addEventListener("submit", (e) => this.handleQuestionSubmit(e));
+      ?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await this.handleQuestionSubmit();
+      });
 
-    // Question interactions
-    document.addEventListener("click", (e) => {
+    // Subject dropdown change
+    document
+      .getElementById("questionSubject")
+      ?.addEventListener("change", (e) => {
+        this.populateTopicDropdown(e.target.value);
+      });
+
+    // Delete buttons
+    document
+      .getElementById("deleteSubjectBtn")
+      ?.addEventListener("click", () => {
+        if (this.editingSubject) {
+          this.showConfirmation(
+            "Delete Subject",
+            `Are you sure you want to delete "${this.editingSubject.name}"? This will also delete all questions in this subject.`,
+            () => this.handleDeleteSubject()
+          );
+        }
+      });
+
+    document.getElementById("deleteTopicBtn")?.addEventListener("click", () => {
+      if (this.editingTopic) {
+        this.showConfirmation(
+          "Delete Topic",
+          `Are you sure you want to delete "${this.editingTopic}"? This will also delete all questions in this topic.`,
+          () => this.handleDeleteTopic()
+        );
+      }
+    });
+
+    document
+      .getElementById("deleteQuestionBtn")
+      ?.addEventListener("click", () => {
+        if (this.editingQuestion) {
+          this.showConfirmation(
+            "Delete Question",
+            "Are you sure you want to delete this question?",
+            () => this.handleDeleteQuestion()
+          );
+        }
+      });
+
+    // Dynamic event delegation for question cards
+    document.addEventListener("click", async (e) => {
+      // Rating buttons
       if (e.target.classList.contains("rating-btn")) {
         const questionId = e.target.dataset.questionId;
         const rating = e.target.dataset.rating;
-        this.handleRateQuestion(questionId, rating);
+        if (questionId && rating) {
+          await this.handleRateQuestion(questionId, rating);
+        }
       }
 
+      // Star buttons
       if (e.target.classList.contains("star-btn")) {
         const questionId = e.target.dataset.questionId;
-        this.toggleImportant(questionId);
+        if (questionId) {
+          await this.toggleImportant(questionId);
+        }
       }
-    });
 
-    // Close modals when clicking outside
-    document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("modal")) {
-        this.hideModal(e.target.id);
+      // Edit question buttons
+      if (
+        e.target.classList.contains("edit-btn") &&
+        e.target.dataset.questionId
+      ) {
+        const questionId = e.target.dataset.questionId;
+        this.showEditQuestion(questionId);
+      }
+
+      // Delete question buttons
+      if (
+        e.target.classList.contains("delete-btn") &&
+        e.target.dataset.questionId
+      ) {
+        const questionId = e.target.dataset.questionId;
+        const question = this.questions.find((q) => q._id === questionId);
+        if (question) {
+          this.showConfirmation(
+            "Delete Question",
+            "Are you sure you want to delete this question?",
+            async () => {
+              try {
+                await this.deleteQuestion(questionId);
+                await this.loadData();
+                if (this.showingImportant) {
+                  this.renderImportantQuestions();
+                } else {
+                  this.renderHome();
+                }
+                this.updateStats();
+              } catch (error) {
+                console.error("Error deleting question:", error);
+                alert("Error deleting question: " + error.message);
+              }
+            }
+          );
+        }
+      }
+
+      // Edit topic buttons
+      if (e.target.classList.contains("topic-edit-btn")) {
+        const topicName = e.target.dataset.topicName;
+        if (topicName) {
+          this.showEditTopic(topicName);
+        }
+      }
+
+      // Delete topic buttons
+      if (e.target.classList.contains("topic-delete-btn")) {
+        const topicName = e.target.dataset.topicName;
+        if (topicName) {
+          this.showConfirmation(
+            "Delete Topic",
+            `Are you sure you want to delete "${topicName}"? This will also delete all questions in this topic.`,
+            async () => {
+              try {
+                await this.deleteTopic(this.currentSubjectId, topicName);
+                await this.loadData();
+                this.renderTopics(this.currentSubjectId);
+              } catch (error) {
+                console.error("Error deleting topic:", error);
+                alert("Error deleting topic: " + error.message);
+              }
+            }
+          );
+        }
       }
     });
+  }
+
+  // Form handlers
+  async handleSubjectSubmit() {
+    try {
+      const name = document.getElementById("subjectName").value.trim();
+      const icon = document.getElementById("subjectIcon").value.trim();
+      const color = document.getElementById("subjectColor").value;
+
+      if (!name || !icon) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      const subjectData = { name, icon, color };
+
+      if (this.editingSubject) {
+        await this.updateSubject(this.editingSubject._id, subjectData);
+      } else {
+        await this.createSubject(subjectData);
+      }
+
+      await this.loadData();
+      this.hideModal("subjectModal");
+
+      if (this.editingSubject) {
+        this.renderTopics(this.editingSubject._id);
+      } else {
+        this.renderSubjects();
+      }
+    } catch (error) {
+      console.error("Error saving subject:", error);
+      alert("Error saving subject: " + error.message);
+    }
+  }
+
+  async handleTopicSubmit() {
+    try {
+      const name = document.getElementById("topicName").value.trim();
+      const subjectId = document.getElementById("topicSubjectId").value;
+
+      if (!name || !subjectId) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      if (this.editingTopic) {
+        const originalName = document.getElementById("originalTopicName").value;
+        await this.updateTopic(subjectId, originalName, name);
+      } else {
+        await this.addTopicToSubject(subjectId, name);
+      }
+
+      await this.loadData();
+      this.hideModal("topicModal");
+      this.renderTopics(subjectId);
+    } catch (error) {
+      console.error("Error saving topic:", error);
+      alert("Error saving topic: " + error.message);
+    }
+  }
+
+  async handleQuestionSubmit() {
+    try {
+      const text = document.getElementById("questionText").value.trim();
+      const subjectId = document.getElementById("questionSubject").value;
+      const topicName = document.getElementById("questionTopic").value;
+
+      if (!text || !subjectId || !topicName) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      const questionData = {
+        text,
+        subject: subjectId,
+        topicName,
+        important: false,
+      };
+
+      if (this.editingQuestion) {
+        await this.updateQuestion(this.editingQuestion._id, questionData);
+      } else {
+        await this.createQuestion(questionData);
+      }
+
+      await this.loadData();
+      this.hideModal("questionModal");
+
+      if (this.showingImportant) {
+        this.renderImportantQuestions();
+      } else {
+        this.renderHome();
+      }
+      this.updateStats();
+    } catch (error) {
+      console.error("Error saving question:", error);
+      alert("Error saving question: " + error.message);
+    }
+  }
+
+  async handleDeleteSubject() {
+    try {
+      if (this.editingSubject) {
+        await this.deleteSubject(this.editingSubject._id);
+        await this.loadData();
+        this.hideModal("subjectModal");
+        this.showSubjectsPage();
+      }
+    } catch (error) {
+      console.error("Error deleting subject:", error);
+      alert("Error deleting subject: " + error.message);
+    }
+  }
+
+  async handleDeleteTopic() {
+    try {
+      if (this.editingTopic && this.currentSubjectId) {
+        await this.deleteTopic(this.currentSubjectId, this.editingTopic);
+        await this.loadData();
+        this.hideModal("topicModal");
+        this.renderTopics(this.currentSubjectId);
+      }
+    } catch (error) {
+      console.error("Error deleting topic:", error);
+      alert("Error deleting topic: " + error.message);
+    }
+  }
+
+  async handleDeleteQuestion() {
+    try {
+      if (this.editingQuestion) {
+        await this.deleteQuestion(this.editingQuestion._id);
+        await this.loadData();
+        this.hideModal("questionModal");
+
+        if (this.showingImportant) {
+          this.renderImportantQuestions();
+        } else {
+          this.renderHome();
+        }
+        this.updateStats();
+      }
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      alert("Error deleting question: " + error.message);
+    }
+  }
+
+  showAuthMessage(message, type = "info") {
+    const messageEl = document.getElementById("authMessage");
+    if (messageEl) {
+      messageEl.textContent = message;
+      messageEl.className = `auth-message ${type}`;
+      messageEl.classList.remove("hidden");
+
+      setTimeout(() => {
+        messageEl.classList.add("hidden");
+      }, 5000);
+    }
   }
 }
 
 // Initialize the app
-const app = new QuestRecallApp();
+document.addEventListener("DOMContentLoaded", () => {
+  new QuestRecallApp();
+});

@@ -8,11 +8,118 @@
   </head>
   <body>
     <div class="app">
+      <!-- Authentication Page -->
+      <div id="authPage" class="page auth-page">
+        <div class="auth-container">
+          <div class="auth-header">
+            <h1 class="auth-logo">QuestRecall</h1>
+            <p class="auth-subtitle">Master anything with spaced repetition</p>
+          </div>
+          
+          <div class="auth-tabs">
+            <button id="loginTab" class="auth-tab active">Login</button>
+            <button id="registerTab" class="auth-tab">Register</button>
+          </div>
+
+          <!-- Login Form -->
+          <div id="loginForm" class="auth-form active">
+            <form id="loginFormElement">
+              <div class="form-group">
+                <label class="form-label" for="loginEmail">Email</label>
+                <input
+                  type="email"
+                  id="loginEmail"
+                  name="email"
+                  class="form-control"
+                  placeholder="Enter your email"
+                  required
+                  autocomplete="email"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="loginPassword">Password</label>
+                <input
+                  type="password"
+                  id="loginPassword"
+                  name="password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  required
+                  autocomplete="current-password"
+                />
+              </div>
+
+              <div class="auth-actions">
+                <button type="submit" class="btn btn--primary btn--full-width">
+                  Sign In
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Register Form -->
+          <div id="registerForm" class="auth-form">
+            <form id="registerFormElement">
+              <div class="form-group">
+                <label class="form-label" for="registerEmail">Email</label>
+                <input
+                  type="email"
+                  id="registerEmail"
+                  name="email"
+                  class="form-control"
+                  placeholder="Enter your email"
+                  required
+                  autocomplete="email"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="registerPassword">Password</label>
+                <input
+                  type="password"
+                  id="registerPassword"
+                  name="password"
+                  class="form-control"
+                  placeholder="Enter your password (min 6 characters)"
+                  required
+                  minlength="6"
+                  autocomplete="new-password"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  class="form-control"
+                  placeholder="Confirm your password"
+                  required
+                  minlength="6"
+                  autocomplete="new-password"
+                />
+              </div>
+
+              <div class="auth-actions">
+                <button type="submit" class="btn btn--primary btn--full-width">
+                  Create Account
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="authMessage" class="auth-message hidden"></div>
+        </div>
+      </div>
+
       <!-- Header -->
       <header class="header">
         <div class="header-content">
           <h1 class="logo" id="appLogo" style="cursor: pointer">QuestRecall</h1>
           <div class="header-actions">
+            <span id="userEmail" class="user-email"></span>
             <button id="randomizeBtn" class="btn btn--outline btn--sm">
               🎲 Randomize
             </button>
@@ -21,6 +128,9 @@
             </button>
             <button id="subjectBtn" class="btn btn--primary btn--sm">
               📚 Change Subject
+            </button>
+            <button id="logoutBtn" class="btn btn--outline btn--sm">
+              🚪 Logout
             </button>
           </div>
         </div>
@@ -86,9 +196,14 @@
         <div id="topicPage" class="page">
           <div class="page-header">
             <h4>Select Topic for <span id="currentSubjectName"></span></h4>
-            <button id="backToSubjects" class="btn btn--outline">
-              ← Back to Subjects
-            </button>
+            <div class="page-actions">
+              <button id="editSubjectBtn" class="btn btn--outline btn--sm">
+                ✏️ Edit Subject
+              </button>
+              <button id="backToSubjects" class="btn btn--outline">
+                ← Back to Subjects
+              </button>
+            </div>
           </div>
           <div class="subjects-grid" id="topicsGrid"></div>
         </div>
@@ -126,6 +241,7 @@
         </div>
         <div class="modal-body">
           <form id="subjectForm">
+            <input type="hidden" id="subjectId" />
             <div class="form-group">
               <label class="form-label" for="subjectName">Subject Name</label>
               <input
@@ -190,8 +306,11 @@
               <button type="button" class="btn btn--outline modal-cancel">
                 Cancel
               </button>
+              <button type="button" id="deleteSubjectBtn" class="btn btn--outline btn--danger hidden">
+                Delete Subject
+              </button>
               <button type="submit" class="btn btn--primary">
-                Create Subject
+                Save Subject
               </button>
             </div>
           </form>
@@ -210,6 +329,8 @@
         </div>
         <div class="modal-body">
           <form id="topicForm">
+            <input type="hidden" id="topicSubjectId" />
+            <input type="hidden" id="originalTopicName" />
             <div class="form-group">
               <label class="form-label" for="topicName">Topic Name</label>
               <input
@@ -237,8 +358,11 @@
               <button type="button" class="btn btn--outline modal-cancel">
                 Cancel
               </button>
+              <button type="button" id="deleteTopicBtn" class="btn btn--outline btn--danger hidden">
+                Delete Topic
+              </button>
               <button type="submit" class="btn btn--primary">
-                Create Topic
+                Save Topic
               </button>
             </div>
           </form>
@@ -257,6 +381,7 @@
         </div>
         <div class="modal-body">
           <form id="questionForm">
+            <input type="hidden" id="questionId" />
             <div class="form-group">
               <label class="form-label" for="questionSubject">Subject</label>
               <select
@@ -309,11 +434,37 @@
               <button type="button" class="btn btn--outline modal-cancel">
                 Cancel
               </button>
+              <button type="button" id="deleteQuestionBtn" class="btn btn--outline btn--danger hidden">
+                Delete Question
+              </button>
               <button type="submit" class="btn btn--primary">
-                Create Question
+                Save Question
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="confirmTitle">Confirm Action</h3>
+          <button class="modal-close" type="button" aria-label="Close modal">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmMessage">Are you sure you want to perform this action?</p>
+          <div class="modal-actions">
+            <button type="button" class="btn btn--outline modal-cancel">
+              Cancel
+            </button>
+            <button type="button" id="confirmAction" class="btn btn--primary">
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
     </div>
