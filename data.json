@@ -240,12 +240,88 @@
             "What are the types of debt Instrument?",
             "What are the types of bond based on issuer?",
             "What would RBI do to increase cashflow in private sector in terms of bonds?",
-            "What is debenture selling?",
-            "What do you mean by crowding out effect?",
+            "What do you mean by these terms a)crowding out effect b)debenture selling c)capital flight?",
             "If US Federal Bond's yield is increased, How will it impact India?",
-            "What is capital flight and what does RBI do to tackle its effects?",
             "If bond yield of government is increased how will it impact corporate loan?",
-            ""
+            "Differentiate between short term and long term government bonds based on a)maturity b)type of bond c)interest rates d)issued by whom e)two examples",
+            "Where would investors prefer to invest in case of a)economic boom b)economic slowdown",
+            "What is CMB? Who issues it? What is its time period, term and type?",
+            "What are the types of financial market differentiate them.",
+            "Identify these for Money Market and Capital Market a)CMB b)Debenture c)SDL d)Promissory Note e)Commercial Paper f)Certificate of BEP g)Shares h)Commercial Bill",
+            "What is the type and term of zero coupon bonds, who issues them and when?",
+            "For these bonds map these out, issuing authority, type, interest, SLR, maturity periods, secured a)T-Bill b)CMB c)Promissory Note",
+            "How can banks bypass CRR/SLR to mitigate excess liquidity and how is it different from savings account?",
+            "What is the purpose, taxation, indexation, maturity period, issuing authority, SLR quota, trading status at stock market of these bonds a)IIB b)SGB c)Masala Bond",
+            "What are commercial bills and how they different from Certificate of Deposit?",
+            "What are the causes of supply side and consumption side inflation and whose role is more to combat them",
+            "What are the types of Inflation based on a)percentage of inflation b)causes of inflation c)items covered?",
+            "What is philips curve and what does it represent? What is an exceptional case in philips curve and what happens to philips curve in that case?",
+            "What steps does government and RBI take to combat stagflation?",
+            "How does inflation impact a)An Individual b)Currency c)Debtor d)Creditor",
+            "What is the difference between WPI, CPI and GDP Deflator based on a)Items covered b)Goods& Services covered c)indirect tax imposition d)issuing authority",
+            "Are imported good included in GDP deflator? Why?"
+          ]
+        },
+        "budget": {
+          "name": "Budget",
+          "questions": [
+            "What do you understand by a)Revenue Receipt b)Capital Receipt c)Good Expenditure d)Bad Expenditure. Give examples and which of these are good and bad?",
+            "How to calculate fiscal deficit and what are the three methods of financing that deficit with their preference?",
+            "When does a fiscal deficit is considered good or bad?",
+            "Derive revenue deficit and capital deficit from fiscal deficit.",
+            "What is Primary deficit and what happens when it gets to zero? Is it good or bad.",
+            "What is revenue receipt? Is it good or bad?",
+            "What do you understand by effective revenue deficit.",
+            "What is FRBM Act and what targets were set for FD, debt/gpp ratio and revenue deficit in 2003 and what has changed in this act over the years.",
+            "What was recommendations of NK Singh committee?",
+            "Under which act consolidated fund of India has been established and which article must be invoked to take out money from CFI?",
+            "Which article gives government the power to issue a)finance bill b)annual financial statement c)appropriation bill",
+            "Which of these statement is true about interim budget a)issued during emergency b)manages expenses and receipt c)more than 1 year"
+          ]
+        },
+        "taxation": {
+          "name": "Taxation",
+          "questions": [
+            "What are incidence and impact in taxation system?",
+            "What do you understand by a)Progressive tax b)Proportional tax c)Income independent tax? Give examples.",
+            "What are source and destination based tax give examples for each.",
+            "For these listed taxes identify which of them are levied by center or state and which of them are direct or indirect a)Personal b)Corporate c)Property d)S-GST e)I-GST f)Custom Duty g)Capital Gain h)Stamp Duty i)Minimal Alternative j)C-GST k)Land Revenue",
+            "What is CITax? What is its rate and identify what kind of tax it is.",
+            "What is the loophole in CITax and how is it handled?",
+            "What was the need for Minimum Alternate Tax and if CIT is Lower than MAT which will be paid?",
+            "What are the exceptions granted under MATax.",
+            "What is Capital Gains Tax and when it is levied? Which of these will be applicable for CGT a)IIB b)Financial Asset c)Physical Asset d)SGB",
+            "What is the term and amount of a)S-CGT b)L-CGT",
+            "What is Security Transaction Tax? Differentiate it from CGT with at least three points.",
+            "Identify which of these products are under the GST, Excise duty but not under GST, both GST and cental excise duty and neither under gst not central excise duty but are taxable a)Real Estate b)Maggie c)Tobacco d)Petroleum Products e)Plastic f)Electricity g)Alcohol",
+            "What was the purpose of introducing GST and which of these ACTs have been replaced by GST a)Property Tax b)Luxury Tax c)Stamp Duty d)Excise duty e)Entertainment Tax f)Entry Tax g)Customs Duty h)Sales Tax",
+            "What is the purpose of GST Council, its meeting frequency and its chairperson? How decision is made in GST council.",
+            "What is cess and who levies it? Give example.",
+            "What is Surcharge and who levies it?",
+            "What does tax buoyancy measures and what does it mean when its greater, less and equal to 1 based on its formula?",
+            "Give formula for tax elasticity and based on this how will you decide if a tax is elastic or not."
+          ]
+        },
+        "balanceOfPayments": {
+          "name": "Balance of Payments",
+          "questions": [
+            "What is balance of payment and which of these will be positive and negative in balance of payments a)export b)FDI c)import d)capital flight e)FPI f)remittance",
+            "How does a incoming flow in bop leads to strong currency and its implications on forex reserve?",
+            "What are inbound investments and what are its effect on forex reserve, capital inflow and G-Sec yield",
+            "Which of these can be the cause of capital outflow? a)increase in exports b)increase in rating c)increase in startup culture in india d)increase in yield of US Fed bond",
+            "In BoP when does a transaction is marked in Current account and when it is marked in Capital account",
+            "What are the components of Current account and Capital account in BoP",
+            "What is the difference between FDI and FPI? Which is more and preferred and why?",
+            "When does a current account is in surplus and in deficit and how does it affect the forex and currency value.",
+            "How can you increase the capital inflow and current inflow in the country?",
+            "In india what is the reason we are able to sustain current account deficit.",
+            "What changes we can make in capital and current outflow to reduce expenditure?",
+            "Which of these statement about balance of trade is true a)it is import subtracted from exports b)it is part of capital account c)our balance of trade is positive?",
+            "Why do we give 100% convertibility in current account exchanges but not in capital account exchanges?",
+            "What was the purpose of Tarapur committee and what were its recommendations.",
+            "What role does RBI play maintaining the exchange rates in case of capital outflow and inflow?",
+            "Why does RBI tries to maintain exchanges rate from falling too low and gaining high rates.",
+            "What are the causes of depreciation, appreciation, revaluation and devaluation of exchange rates."
           ]
         }
       }
